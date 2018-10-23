@@ -31,7 +31,8 @@ namespace MHWNoChunk
         BackgroundWorker analyzeworker, extractworker;
         List<FileNode> itemlist;
         string output_directory = "";
-
+        int extract_progress = 0;
+        int total_progress = 0;
         
         public MainWindow()
         {
@@ -62,6 +63,19 @@ namespace MHWNoChunk
 
         private void DoExtractHandler(object sender, DoWorkEventArgs e)
         {
+            extract_progress = 0;
+            if (itemlist.Count > 0)
+            {
+                FileNode rootnode = itemlist[0];
+                total_progress = rootnode.getSelectedCount();
+            }
+            if (total_progress == 0) { printlog("未选择任何文件");
+                Dispatcher.BeginInvoke(new Action(() => {
+                    ExtractBtn.IsEnabled = true;
+                }));
+                return;
+            }
+
             printlog("正在输出至: " + output_directory);
             printlog("根据您的电脑状况及选择解包的文件大小，可能会出现长时间未响应的情况，请耐心等待。");
             Chunk.ExtractSelected(itemlist, output_directory,this);
@@ -114,6 +128,20 @@ namespace MHWNoChunk
                 }));
             }
             
+        }
+
+        public void setProgressbar(int value, int total) {
+            if (value > total) value = total;
+            Dispatcher.BeginInvoke(new Action(()=> {
+                progressbar.Value = value * 100 / total;
+            }));
+        }
+
+        public void addExtractProgress() {
+            extract_progress = extract_progress >= total_progress ? total_progress : extract_progress + 1;
+            Dispatcher.BeginInvoke(new Action(() => {
+                progressbar.Value = extract_progress * 100 / total_progress;
+            }));
         }
 
         private void ExtractBtn_Click(object sender, RoutedEventArgs e)

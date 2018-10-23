@@ -35,6 +35,17 @@ namespace MHWNoChunk
             }
         }
 
+        public int getSelectedCount() {
+            int count = 0;
+            foreach (FileNode node in Childern) {
+                count += node.getSelectedCount();
+            }
+            if (IsFile && IsSelected) {
+                count++;
+            }
+            return count;
+        }
+
         public void setChilrenSelected(bool selected)
         {
             foreach (FileNode child in Childern)

@@ -41,7 +41,6 @@ namespace MHWNoChunk
                 // Process file size
                 byte[] ArrayTmp1 = new byte[8];
                 byte[] ArrayChunkSize = Reader.ReadBytes(3);
-                //int Low = ArrayChunkSize[0] & 0x0F;
                 int High = ArrayChunkSize[0] >> 4;
                 ArrayChunkSize[0] = BitConverter.GetBytes(High)[0];
                 Array.Copy(ArrayChunkSize, ArrayTmp1, ArrayChunkSize.Length);
@@ -143,12 +142,14 @@ namespace MHWNoChunk
                     }
                     target_node.Childern.Add(child_node);
                 }
+                mainwindow.setProgressbar(i + 1,TotalParentCount);
             }
             ChunkCache.Clear();
             return filelist;
         }
 
         public static void ExtractSelected(List<FileNode> itemlist, string BaseLocation, MainWindow mainWindow) {
+            
             foreach (FileNode node in itemlist) {
                 if (node.Childern.Count > 0)
                 {
@@ -180,7 +181,9 @@ namespace MHWNoChunk
                     }
                     if(!node.IsFile) new FileInfo(BaseLocation + node.EntireName + "\\").Directory.Create();
                     else new FileInfo(BaseLocation + node.EntireName).Directory.Create();
-                    if(node.IsFile)File.WriteAllBytes(BaseLocation + node.EntireName, getOnLength(size));
+                    if (node.IsFile) { File.WriteAllBytes(BaseLocation + node.EntireName, getOnLength(size));
+                        mainWindow.addExtractProgress();
+                    }
                     //mainWindow.printlog("已输出：" + BaseLocation + node.EntireName);
                 }
             }

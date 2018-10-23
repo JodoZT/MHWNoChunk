@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MHWNoChunk"
         mc:Ignorable="d"
-        Title="MHWNoChunk By Jodo" Height="768" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
+        Title="MHWNoChunk By Jodo" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
     <Grid x:Name="maingrid" AllowDrop="True">
         <Viewbox Stretch="Fill">
-            <Canvas Width="1200" Height="768">
+            <Canvas Width="1200" Height="807">
                 <TextBox x:Name="LogBox" HorizontalAlignment="Left" Height="119" TextWrapping="Wrap" Text="拖拽chunk文件至上方空白区域以打开" VerticalAlignment="Top" Width="932" Canvas.Left="10" Canvas.Top="639" FontSize="18" IsReadOnly="True"/>
                 <TreeView x:Name="FileTree" HorizontalAlignment="Left" Height="629" VerticalAlignment="Top" Width="1180" Canvas.Left="10" Canvas.Top="10">
                     <TreeView.ItemTemplate>
@@ -27,6 +27,7 @@
                     </TreeView.ItemContainerStyle>
                 </TreeView>
                 <Button x:Name="ExtractBtn" Content="提取所选文件" Canvas.Left="947" Canvas.Top="644" Width="243" Height="114" FontSize="28" IsEnabled="False" Click="ExtractBtn_Click" ClickMode="Release" Background="Green"/>
+                <ProgressBar x:Name="progressbar" Height="34" Canvas.Left="10" Canvas.Top="763" Width="1180" Maximum="100"/>
 
             </Canvas>
         </Viewbox>
