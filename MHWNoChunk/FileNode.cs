@@ -13,13 +13,14 @@ namespace MHWNoChunk
         public string Name { get; set; }
         public List<FileNode> Childern { get; set; }
         public string Icon { get; set; }
-        private bool isSelected;
         public string EntireName { get; set; }
         public long Offset { get; set; }
         public long Size { get; set; }
-        public int ChunkLoc { get; set; }
+        public int ChunkIndex { get; set; }
         public bool IsFile { get; set; }
         public int ChunkPointer { get; set; }
+
+        private bool isSelected;
 
         public bool IsSelected
         {

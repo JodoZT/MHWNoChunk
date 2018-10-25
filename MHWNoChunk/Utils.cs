@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace MHWNoChunk
 {
+    //Copy from WorldChunkTool by MHVuze https://github.com/mhvuze/WorldChunkTool
     class Utils
     {
         // Import Oodle decompression

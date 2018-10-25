@@ -26,14 +26,13 @@ namespace MHWNoChunk
     {
         private string chunkfilename;
         static int MagicChunk = 0x00504D43;
-        static int MagicPKG = 0x20474B50;
         int MagicInputFile;
         BackgroundWorker analyzeworker, extractworker;
         List<FileNode> itemlist;
         string output_directory = "";
         int extract_progress = 0;
         int total_progress = 0;
-        
+
         public MainWindow()
         {
             InitializeComponent();
@@ -55,9 +54,10 @@ namespace MHWNoChunk
             chunkfilename = ((System.Array)e.Data.GetData(System.Windows.DataFormats.FileDrop)).GetValue(0).ToString();
             Console.WriteLine(chunkfilename);
             analyzeworker.RunWorkerAsync();
-            
+
         }
-        private void DoAnalyzeHandler(object sender, DoWorkEventArgs e) {
+        private void DoAnalyzeHandler(object sender, DoWorkEventArgs e)
+        {
             analyze(chunkfilename);
         }
 
@@ -69,36 +69,43 @@ namespace MHWNoChunk
                 FileNode rootnode = itemlist[0];
                 total_progress = rootnode.getSelectedCount();
             }
-            if (total_progress == 0) { printlog("未选择任何文件");
-                Dispatcher.BeginInvoke(new Action(() => {
+            if (total_progress == 0)
+            {
+                printlog("Nothing selected.");
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
                     ExtractBtn.IsEnabled = true;
                 }));
                 return;
             }
 
-            printlog("正在输出至: " + output_directory);
-            printlog("根据您的电脑状况及选择解包的文件大小，可能会出现长时间未响应的情况，请耐心等待。");
-            Chunk.ExtractSelected(itemlist, output_directory,this);
-            Dispatcher.BeginInvoke(new Action(() => {
+            printlog("Output to: " + output_directory);
+            printlog("It may take a long time to extract according to the ability of your computer and the size of files you selected. Please wait patiently.");
+            Chunk.ExtractSelected(itemlist, output_directory, this);
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
                 ExtractBtn.IsEnabled = true;
             }));
-            printlog("解包完成");
+            printlog("Extract succeeded!");
         }
 
-        private void analyze(string filename) {
-            if (!File.Exists(filename)) { printlog("错误：文件不存在。"); return; }
+        // To analyze the chunkN.bin
+        private void analyze(string filename)
+        {
+            if (!File.Exists(filename)) { printlog("Error：file not exists."); return; }
 
             try
             {
                 using (BinaryReader Reader = new BinaryReader(File.Open(filename, FileMode.Open))) MagicInputFile = Reader.ReadInt32();
                 if (MagicInputFile == MagicChunk)
                 {
-                    printlog("已识别chunk文件，正在解析，请耐心等耐...", true);
-                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll")) { printlog("错误：缺少oo2core_5_win64.dll"); Console.Read(); return; }
+                    printlog("Chunk file detected. Analyzing...", true);
+                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll")) { printlog("Error: oo2core_5_win64.dll not found."); Console.Read(); return; }
 
                     itemlist = Chunk.AnalyzeChunk(filename, this);
-                    printlog("解析完成");
-                    Dispatcher.BeginInvoke(new Action(()=> {
+                    printlog("Analyze finished.");
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         this.AllowDrop = false;
                         maingrid.AllowDrop = false;
                         ExtractBtn.IsEnabled = true;
@@ -108,56 +115,68 @@ namespace MHWNoChunk
             }
             catch (Exception e)
             {
-                printlog("错误：错误内容如下");
+                printlog("Error as follows:");
                 printlog(e.Message);
                 return;
             }
         }
 
-        public void printlog(string log, bool clear = false) {
+        // Print log to window
+        public void printlog(string log, bool clear = false)
+        {
             if (!clear) Dispatcher.BeginInvoke(new Action(() =>
             {
                 LogBox.Text += (log + "\n");
                 LogBox.ScrollToEnd();
             }));
-            else {
+            else
+            {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     LogBox.Text = (log + "\n");
                     LogBox.ScrollToEnd();
                 }));
             }
-            
         }
 
-        public void setProgressbar(int value, int total) {
+        // Update progress bar
+        public void setProgressbar(int value, int total)
+        {
             if (value > total) value = total;
-            Dispatcher.BeginInvoke(new Action(()=> {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
                 progressbar.Value = value * 100 / total;
             }));
         }
 
-        public void addExtractProgress() {
+        // Update progress bar
+        public void updateExtractProgress()
+        {
             extract_progress = extract_progress >= total_progress ? total_progress : extract_progress + 1;
-            Dispatcher.BeginInvoke(new Action(() => {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
                 progressbar.Value = extract_progress * 100 / total_progress;
             }));
         }
 
         private void ExtractBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (output_directory.Equals("")) {FolderBrowserDialog fbd = new FolderBrowserDialog();
-            fbd.Description = "请选择解包输出文件夹";
+            // Select the output directory
+            if (output_directory.Equals(""))
+            {
+                FolderBrowserDialog fbd = new FolderBrowserDialog();
+                fbd.Description = "Select the directory you want to export to:";
 
-            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                output_directory = fbd.SelectedPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(chunkfilename);
+                if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    output_directory = fbd.SelectedPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(chunkfilename);
+                }
+                else
+                {
+                    printlog("Aborted.");
+                    return;
+                }
             }
-            else
-            {
-                printlog("已放弃解包");
-                return;
-            } }
             ExtractBtn.IsEnabled = false;
             extractworker.RunWorkerAsync();
         }
