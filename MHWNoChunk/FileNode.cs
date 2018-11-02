@@ -19,6 +19,7 @@ namespace MHWNoChunk
         public int ChunkIndex { get; set; }
         public bool IsFile { get; set; }
         public int ChunkPointer { get; set; }
+        public string NameWithSize { get; set; }
 
         private bool isSelected;
 
@@ -55,11 +56,47 @@ namespace MHWNoChunk
             }
         }
 
+        public long getSize() {
+            if (IsFile) { setNameWithSize(Name, Size); return Size; }
+            else
+            {
+                long _size = 0;
+                foreach (FileNode child in Childern)
+                {
+                    _size += child.getSize();
+                }
+                Size = _size;
+                setNameWithSize(Name, Size);
+                return _size;
+            }
+        }
+
+        private void setNameWithSize(string name, long _size) {
+            string sizestr = "";
+            if (_size < 1024)
+            {
+                sizestr = $"{_size} B";
+            }
+            else if (_size >= 1024 && _size <= 1048576)
+            {
+                sizestr = $"{_size / 1024f:F2} KB";
+            }
+            else if (_size <= 1073741824 && _size >= 1048576)
+            {
+                sizestr = $"{_size / 1048576f:F2} MB";
+            }
+            else {
+                sizestr = $"{_size / 1073741824f:F2} GB";
+            }
+            NameWithSize = $"{Name} ({sizestr})";
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public FileNode()
         {
             Name = "";
+            NameWithSize = "";
             Icon = AppDomain.CurrentDomain.BaseDirectory + "\\file.png";
             Childern = new List<FileNode>();
             IsSelected = false;
@@ -69,6 +106,7 @@ namespace MHWNoChunk
         public FileNode(string name)
         {
             Name = name;
+            NameWithSize = "";
             Icon = AppDomain.CurrentDomain.BaseDirectory + "\\file.png";
             Childern = new List<FileNode>();
             IsSelected = false;
@@ -78,6 +116,7 @@ namespace MHWNoChunk
         public FileNode(string name, bool isFile)
         {
             Name = name;
+            NameWithSize = "";
             IsFile = isFile;
             if (isFile) Icon = AppDomain.CurrentDomain.BaseDirectory + "\\file.png";
             else Icon = AppDomain.CurrentDomain.BaseDirectory + "\\dir.png";
@@ -88,6 +127,7 @@ namespace MHWNoChunk
         public FileNode(string name, List<FileNode> children)
         {
             Name = name;
+            NameWithSize = "";
             Icon = AppDomain.CurrentDomain.BaseDirectory + "\\file.png";
             Childern = children;
             IsSelected = false;

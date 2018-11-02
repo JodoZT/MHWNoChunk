@@ -16,7 +16,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <CheckBox Content="" FontSize="14" IsChecked="{Binding Path=IsSelected,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                                 <Image VerticalAlignment="Center" Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,2,2"></Image>
-                                <TextBlock Text="{Binding Name}"/>
+                                <TextBlock Text="{Binding NameWithSize}"/>
                             </StackPanel>
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>

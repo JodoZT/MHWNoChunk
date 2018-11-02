@@ -148,13 +148,15 @@ namespace MHWNoChunk
                 mainwindow.setProgressbar(i + 1, TotalParentCount);
             }
             ChunkCache.Clear();
+            if (filelist.Count > 0) {
+                filelist[0].getSize();
+            }
             return filelist;
         }
 
         //Extact function
         public static void ExtractSelected(List<FileNode> itemlist, string BaseLocation, MainWindow mainWindow)
         {
-
             foreach (FileNode node in itemlist)
             {
                 if (node.Childern.Count > 0)
