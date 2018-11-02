@@ -157,46 +157,58 @@ namespace MHWNoChunk
         //Extact function
         public static void ExtractSelected(List<FileNode> itemlist, string BaseLocation, MainWindow mainWindow)
         {
+            int failed = 0;
             foreach (FileNode node in itemlist)
             {
-                if (node.Childern.Count > 0)
+                try
                 {
-                    ExtractSelected(node.Childern, BaseLocation, mainWindow);
+                    if (node.Childern.Count > 0)
+                    {
+                        ExtractSelected(node.Childern, BaseLocation, mainWindow);
+                    }
+                    else if (node.IsSelected)
+                    {
+                        cur_index = node.ChunkIndex;
+                        cur_pointer = node.ChunkPointer;
+                        long size = node.Size;
+                        if (ChunkCache.ContainsKey(cur_index))
+                        {
+                            ChunkDecompressed = ChunkCache[cur_index];
+                        }
+                        else
+                        {
+                            if (ChunkCache.Count > 100) ChunkCache.Clear();
+                            ChunkDecompressed = getDecompressedChunk(ChunkOffsetDict[cur_index], MetaChunk[ChunkOffsetDict[cur_index]], Reader);
+                            ChunkCache.Add(cur_index, ChunkDecompressed);
+                        }
+                        if (ChunkCache.ContainsKey(cur_index + 1))
+                        {
+                            NextChunkDecompressed = ChunkCache[cur_index + 1];
+                        }
+                        else
+                        {
+                            if (ChunkCache.Count > 100) ChunkCache.Clear();
+                            if (cur_index + 1 < DictCount) { NextChunkDecompressed = getDecompressedChunk(ChunkOffsetDict[cur_index + 1], MetaChunk[ChunkOffsetDict[cur_index + 1]], Reader); }
+                            else { NextChunkDecompressed = new byte[0]; }
+                            ChunkCache.Add(cur_index + 1, NextChunkDecompressed);
+                        }
+                        if (!node.IsFile) new FileInfo(BaseLocation + node.EntireName + "\\").Directory.Create();
+                        else new FileInfo(BaseLocation + node.EntireName).Directory.Create();
+                        if (node.IsFile)
+                        {
+                            File.WriteAllBytes(BaseLocation + node.EntireName, getOnLength(size));
+                            mainWindow.updateExtractProgress();
+                        }
+                    }
                 }
-                else if (node.IsSelected)
+                catch (Exception ex)
                 {
-                    cur_index = node.ChunkIndex;
-                    cur_pointer = node.ChunkPointer;
-                    long size = node.Size;
-                    if (ChunkCache.ContainsKey(cur_index))
-                    {
-                        ChunkDecompressed = ChunkCache[cur_index];
-                    }
-                    else
-                    {
-                        if (ChunkCache.Count > 100) ChunkCache.Clear();
-                        ChunkDecompressed = getDecompressedChunk(ChunkOffsetDict[cur_index], MetaChunk[ChunkOffsetDict[cur_index]], Reader);
-                        ChunkCache.Add(cur_index, ChunkDecompressed);
-                    }
-                    if (ChunkCache.ContainsKey(cur_index + 1))
-                    {
-                        NextChunkDecompressed = ChunkCache[cur_index + 1];
-                    }
-                    else
-                    {
-                        if (ChunkCache.Count > 100) ChunkCache.Clear();
-                        if (cur_index + 1 < DictCount) { NextChunkDecompressed = getDecompressedChunk(ChunkOffsetDict[cur_index + 1], MetaChunk[ChunkOffsetDict[cur_index + 1]], Reader); }
-                        else { NextChunkDecompressed = new byte[0]; }
-                        ChunkCache.Add(cur_index + 1, NextChunkDecompressed);
-                    }
-                    if (!node.IsFile) new FileInfo(BaseLocation + node.EntireName + "\\").Directory.Create();
-                    else new FileInfo(BaseLocation + node.EntireName).Directory.Create();
-                    if (node.IsFile)
-                    {
-                        File.WriteAllBytes(BaseLocation + node.EntireName, getOnLength(size));
-                        mainWindow.updateExtractProgress();
-                    }
+                    mainWindow.printlog($"Some unexpected error occured while extracting {node.EntireName}, skiped. Please try again later");
+                    failed += 1;
                 }
+            }
+            if (failed > 0) {
+                mainWindow.printlog($"{failed} files failed in total.");
             }
         }
 
