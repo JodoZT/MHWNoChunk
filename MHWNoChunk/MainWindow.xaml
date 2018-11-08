@@ -5,9 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MHWNoChunk"
         mc:Ignorable="d"
-        Title="MHWNoChunk By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
+        Title="MHWNoChunk v1.2.1 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
     <Grid x:Name="maingrid" AllowDrop="True">
-        <Viewbox Stretch="Fill">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="115*"/>
+            <ColumnDefinition Width="481*"/>
+        </Grid.ColumnDefinitions>
+        <Viewbox Stretch="Fill" Grid.ColumnSpan="2">
             <Canvas Width="1200" Height="807">
                 <TextBox x:Name="LogBox" HorizontalAlignment="Left" Height="119" TextWrapping="Wrap" Text="Drag and drop the chunk*.bin file to the blank area above to start." VerticalAlignment="Top" Width="932" Canvas.Left="10" Canvas.Top="639" FontSize="18" IsReadOnly="True"/>
                 <TreeView x:Name="FileTree" HorizontalAlignment="Left" Height="629" VerticalAlignment="Top" Width="1180" Canvas.Left="10" Canvas.Top="10">

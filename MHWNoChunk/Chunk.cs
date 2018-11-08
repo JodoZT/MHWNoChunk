@@ -116,7 +116,7 @@ namespace MHWNoChunk
                             ChunkCache.Remove(cur_index + 1);
                         }
                         StringNameChild = getName(0x50);
-                        getOnLength(0x68);
+                        getOnLength(0x68, new byte[0x68], 0);
                     }
                     string[] fathernodes = StringNameChild.Split('\\');
                     bool isFile = false;
@@ -155,7 +155,7 @@ namespace MHWNoChunk
         }
 
         //Extact function
-        public static void ExtractSelected(List<FileNode> itemlist, string BaseLocation, MainWindow mainWindow)
+        public static int ExtractSelected(List<FileNode> itemlist, string BaseLocation, MainWindow mainWindow)
         {
             int failed = 0;
             foreach (FileNode node in itemlist)
@@ -164,7 +164,7 @@ namespace MHWNoChunk
                 {
                     if (node.Childern.Count > 0)
                     {
-                        ExtractSelected(node.Childern, BaseLocation, mainWindow);
+                        failed += ExtractSelected(node.Childern, BaseLocation, mainWindow);
                     }
                     else if (node.IsSelected)
                     {
@@ -196,7 +196,7 @@ namespace MHWNoChunk
                         else new FileInfo(BaseLocation + node.EntireName).Directory.Create();
                         if (node.IsFile)
                         {
-                            File.WriteAllBytes(BaseLocation + node.EntireName, getOnLength(size));
+                            File.WriteAllBytes(BaseLocation + node.EntireName, getOnLength(size, new byte[size], 0));
                             mainWindow.updateExtractProgress();
                         }
                     }
@@ -207,9 +207,7 @@ namespace MHWNoChunk
                     failed += 1;
                 }
             }
-            if (failed > 0) {
-                mainWindow.printlog($"{failed} files failed in total.");
-            }
+            return failed;
         }
 
         //To get decompressed chunk
@@ -232,35 +230,34 @@ namespace MHWNoChunk
         //To read an ASCII string from chunk bytes
         private static string getName(int targetlength)
         {
-            return Convert.ToString(System.Text.Encoding.ASCII.GetString(getOnLength(targetlength).Where(b => b != 0x00).ToArray()));
+            return Convert.ToString(System.Text.Encoding.ASCII.GetString(getOnLength(targetlength, new byte[targetlength], 0).Where(b => b != 0x00).ToArray()));
         }
 
         //To read int64 from chunk bytes
         private static long getInt64()
         {
-            return BitConverter.ToInt64(getOnLength(8), 0);
+            return BitConverter.ToInt64(getOnLength(8, new byte[8], 0), 0);
         }
 
         //To read int64 from chunk bytes
         private static int getInt32()
         {
-            return BitConverter.ToInt32(getOnLength(4), 0);
+            return BitConverter.ToInt32(getOnLength(4, new byte[4], 0), 0);
         }
 
         //To read a byte array at length of targetlength
-        private static byte[] getOnLength(long targetlength)
+        private static byte[] getOnLength(long targetlength, byte[] tmp, long startAddr)
         {
-            byte[] tmp = new byte[targetlength];
             if (cur_pointer + targetlength < 0x40000)
             {
-                Array.Copy(ChunkDecompressed, cur_pointer, tmp, 0, targetlength);
+                Array.Copy(ChunkDecompressed, cur_pointer, tmp, startAddr, targetlength);
                 cur_pointer += (int)targetlength;
             }
             else
             {
                 int tmp_can_read_length = 0x40000 - cur_pointer;
                 long tmp_remain_length = targetlength - tmp_can_read_length;
-                Array.Copy(ChunkDecompressed, cur_pointer, tmp, 0, tmp_can_read_length);
+                Array.Copy(ChunkDecompressed, cur_pointer, tmp, startAddr, tmp_can_read_length);
                 cur_pointer = 0;
                 ChunkDecompressed = NextChunkDecompressed;
                 cur_index += 1;
@@ -269,8 +266,7 @@ namespace MHWNoChunk
                 {
                     NextChunkDecompressed = new byte[0];
                 }
-                byte[] tmpmore = getOnLength(tmp_remain_length);
-                Array.Copy(tmpmore, 0, tmp, tmp_can_read_length, tmp_remain_length);
+                getOnLength(tmp_remain_length, tmp, startAddr + tmp_can_read_length);
             }
             return tmp;
         }

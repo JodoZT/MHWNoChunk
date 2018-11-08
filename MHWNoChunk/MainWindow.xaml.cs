@@ -81,7 +81,10 @@ namespace MHWNoChunk
 
             printlog("Output to: " + output_directory);
             printlog("It may take a long time to extract according to the ability of your computer and the size of files you selected. Please wait patiently.");
-            Chunk.ExtractSelected(itemlist, output_directory, this);
+            int failed = Chunk.ExtractSelected(itemlist, output_directory, this);
+            if (failed > 0) {
+                printlog($"{failed} files failed in total.");
+            }
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 ExtractBtn.IsEnabled = true;
