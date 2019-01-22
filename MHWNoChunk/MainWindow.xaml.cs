@@ -19,19 +19,19 @@ using System.Windows.Forms;
 
 namespace MHWNoChunk
 {
-    /// <summary>
-    /// MainWindow.xaml 的交互逻辑
-    /// </summary>
     public partial class MainWindow : Window
     {
         private string chunkfilename;
         static int MagicChunk = 0x00504D43;
         int MagicInputFile;
         BackgroundWorker analyzeworker, extractworker;
-        List<FileNode> itemlist;
+        List<FileNode> itemlist = new List<FileNode>();
         string output_directory = "";
         int extract_progress = 0;
         int total_progress = 0;
+        Chunk mainChunk;
+        bool CombineChecked = false;
+        Dictionary<string, Chunk> chunkMap = new Dictionary<string, Chunk>();
 
         public MainWindow()
         {
@@ -42,6 +42,7 @@ namespace MHWNoChunk
             extractworker = new BackgroundWorker();
             extractworker.WorkerSupportsCancellation = true;
             extractworker.DoWork += new DoWorkEventHandler(DoExtractHandler);
+            
         }
 
         private void item_SelectedItemChanged(object sender, RoutedEventArgs e)
@@ -79,33 +80,55 @@ namespace MHWNoChunk
                 return;
             }
 
-            printlog("Output to: " + output_directory);
-            printlog("It may take a long time to extract according to the ability of your computer and the size of files you selected. Please wait patiently.");
-            int failed = Chunk.ExtractSelected(itemlist, output_directory, this);
+            printlog("Export to: " + output_directory);
+            printlog("It may take a long time to extract all the files you selected which depends on the file size and count you selected.");
+            int failed = 0;
+            if(CombineChecked) chunkMap.FirstOrDefault().Value.ExtractSelected(itemlist, output_directory, this);
+            else failed = mainChunk.ExtractSelected(itemlist, output_directory, this);
             if (failed > 0) {
-                printlog($"{failed} files failed in total.");
+                printlog($"{failed} files failed to extract in total.");
             }
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 ExtractBtn.IsEnabled = true;
             }));
-            printlog("Extract succeeded!");
+            printlog("Finished!");
         }
 
         // To analyze the chunkN.bin
         private void analyze(string filename)
         {
-            if (!File.Exists(filename)) { printlog("Error：file not exists."); return; }
+            if (!File.Exists(filename)) { printlog("Error: file does not exist."); return; }
 
             try
             {
                 using (BinaryReader Reader = new BinaryReader(File.Open(filename, FileMode.Open))) MagicInputFile = Reader.ReadInt32();
                 if (MagicInputFile == MagicChunk)
                 {
-                    printlog("Chunk file detected. Analyzing...", true);
-                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll")) { printlog("Error: oo2core_5_win64.dll not found."); Console.Read(); return; }
-
-                    itemlist = Chunk.AnalyzeChunk(filename, this);
+                    printlog("Chunk detected，now analyzing...", true);
+                    if (CombineChecked) {
+                        printlog("Combine mode on. The program will combine all the chunk files.");
+                    }
+                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll")) { printlog("Error: oo2core_5_win64.dll not found. Copy the file from root path where your MHW game install at."); Console.Read(); return; }
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        CombineCheckBox.IsEnabled = false;
+                    }));
+                    if (CombineChecked)
+                    {
+                        FileInfo chosenChunkFileInfo = new FileInfo(filename);
+                        string[] chunkfiles = Directory.GetFiles(chosenChunkFileInfo.DirectoryName, "chunk*.bin");
+                        foreach (string filenameEach in chunkfiles)
+                        {
+                            Chunk cur_chunk = new Chunk();
+                            itemlist = cur_chunk.AnalyzeChunk(filenameEach, this, itemlist);
+                            chunkMap.Add(filenameEach, cur_chunk);
+                        }
+                    }
+                    else {
+                        mainChunk = new Chunk();
+                        itemlist = mainChunk.AnalyzeChunk(filename, this, itemlist);
+                    }
                     printlog("Analyze finished.");
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -118,7 +141,7 @@ namespace MHWNoChunk
             }
             catch (Exception e)
             {
-                printlog("Error as follows:");
+                printlog("Error info is as follows:");
                 printlog(e.Message);
                 return;
             }
@@ -168,20 +191,36 @@ namespace MHWNoChunk
             if (output_directory.Equals(""))
             {
                 FolderBrowserDialog fbd = new FolderBrowserDialog();
-                fbd.Description = "Select the directory you want to export to:";
+                fbd.Description = "Select the path where you want to export the files to and the program will create a chunkN directory.";
 
                 if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    output_directory = fbd.SelectedPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(chunkfilename);
+                    if (CombineChecked) { output_directory = fbd.SelectedPath + "\\chunk"; }
+                    else output_directory = fbd.SelectedPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(chunkfilename);
                 }
                 else
                 {
-                    printlog("Aborted.");
+                    printlog("Canceled.");
                     return;
                 }
             }
             ExtractBtn.IsEnabled = false;
             extractworker.RunWorkerAsync();
+        }
+
+        private void CombineCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            CombineChecked = true;
+        }
+
+        private void CombineCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            CombineChecked = false;
+        }
+
+        public Chunk getChunk(string chunkfile) {
+            if(chunkMap.ContainsKey(chunkfile))return chunkMap[chunkfile];
+            return mainChunk;
         }
     }
 }

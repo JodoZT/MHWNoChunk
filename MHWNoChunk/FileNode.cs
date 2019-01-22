@@ -8,7 +8,7 @@ using System.Windows.Controls;
 
 namespace MHWNoChunk
 {
-    class FileNode : INotifyPropertyChanged
+    public class FileNode : INotifyPropertyChanged
     {
         public string Name { get; set; }
         public List<FileNode> Childern { get; set; }
@@ -20,6 +20,8 @@ namespace MHWNoChunk
         public bool IsFile { get; set; }
         public int ChunkPointer { get; set; }
         public string NameWithSize { get; set; }
+        public string FromChunk { get; set; }
+        public string FromChunkName { get; set; }
 
         private bool isSelected;
 
@@ -113,7 +115,7 @@ namespace MHWNoChunk
             IsFile = false;
         }
 
-        public FileNode(string name, bool isFile)
+        public FileNode(string name, bool isFile, string fromChunk)
         {
             Name = name;
             NameWithSize = "";
@@ -122,6 +124,8 @@ namespace MHWNoChunk
             else Icon = AppDomain.CurrentDomain.BaseDirectory + "\\dir.png";
             Childern = new List<FileNode>();
             IsSelected = false;
+            FromChunk = fromChunk;
+            FromChunkName = $"({System.IO.Path.GetFileNameWithoutExtension(fromChunk)})";
         }
 
         public FileNode(string name, List<FileNode> children)

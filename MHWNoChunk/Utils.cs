@@ -28,7 +28,7 @@ namespace MHWNoChunk
             }
             else
             {
-                throw new Exception("There was an error while decompressing.");
+                throw new Exception("An error occured while decompressing.");
             }
         }
     }
