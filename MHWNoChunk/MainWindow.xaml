@@ -5,15 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MHWNoChunk"
         mc:Ignorable="d"
-        Title="MHWNoChunk v1.3.0 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
+        Title="MHWNoChunk v1.3.1 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
     <Grid x:Name="maingrid" AllowDrop="True">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="115*"/>
-            <ColumnDefinition Width="481*"/>
-        </Grid.ColumnDefinitions>
         <Viewbox Stretch="Fill" Grid.ColumnSpan="2">
             <Canvas Width="1200" Height="807">
-                <TextBox x:Name="LogBox" HorizontalAlignment="Left" Height="119" TextWrapping="Wrap" Text="Drag and drop chunkN.bin to the black area above. Check the 'Combine all chunks' option on the right side if you want to once combine all chunkNs and extract with all the newest version files." VerticalAlignment="Top" Width="932" Canvas.Left="10" Canvas.Top="639" FontSize="18" IsReadOnly="True"/>
+                <TextBox x:Name="LogBox" HorizontalAlignment="Left" Height="119" TextWrapping="Wrap" Text="Drag and drop chunkN.bin to the black area above. Check the 'Combine all chunks' option on the right side before dragdrop if you want to once combine all chunkNs and extract with all the newest version files." VerticalAlignment="Top" Width="932" Canvas.Left="10" Canvas.Top="639" FontSize="18" IsReadOnly="True"/>
                 <TreeView x:Name="FileTree" HorizontalAlignment="Left" Height="629" VerticalAlignment="Top" Width="1180" Canvas.Left="10" Canvas.Top="10">
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding Childern}">
@@ -33,7 +29,12 @@
                 </TreeView>
                 <Button x:Name="ExtractBtn" Content="Extract selected" Canvas.Left="947" Canvas.Top="677" Width="243" Height="81" FontSize="28" IsEnabled="False" Click="ExtractBtn_Click" ClickMode="Release" Background="Green"/>
                 <ProgressBar x:Name="progressbar" Height="34" Canvas.Left="10" Canvas.Top="763" Width="1180" Maximum="100"/>
+
+
                 <CheckBox x:Name="CombineCheckBox"  Content="Combine all chunks" Canvas.Left="947" Canvas.Top="644" Height="28" Width="243" VerticalContentAlignment="Center" FontSize="20" Checked="CombineCheckBox_Checked" Unchecked="CombineCheckBox_Unchecked"/>
+                <Label Content="{Binding Value, ElementName=progressbar}" Canvas.Left="391" Canvas.Top="763" Height="34" Width="193" HorizontalContentAlignment="Right" FontSize="20"/>
+                <Label Content="/" Canvas.Left="588" Canvas.Top="761" Height="34" Width="19" FontSize="20"/>
+                <Label Content="{Binding Maximum, ElementName=progressbar}" Canvas.Left="607" Canvas.Top="763" Height="34" Width="199"  HorizontalContentAlignment="Left" FontSize="20"/>
             </Canvas>
         </Viewbox>
     </Grid>

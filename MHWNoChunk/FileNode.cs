@@ -74,46 +74,31 @@ namespace MHWNoChunk
         }
 
         private void setNameWithSize(string name, long _size) {
+            NameWithSize = $"{Name} ({getSizeStr(_size)})";
+        }
+
+        public string getSizeStr(long _size) {
             string sizestr = "";
             if (_size < 1024)
             {
                 sizestr = $"{_size} B";
             }
-            else if (_size >= 1024 && _size <= 1048576)
+            else if (_size >= 1024 && _size < 1048576)
             {
                 sizestr = $"{_size / 1024f:F2} KB";
             }
-            else if (_size <= 1073741824 && _size >= 1048576)
+            else if (_size < 1073741824 && _size >= 1048576)
             {
-                sizestr = $"{_size / 1048576f:F2} MB";
+                sizestr = $"{(_size >> 10) / 1024f:F2} MB";
             }
-            else {
-                sizestr = $"{_size / 1073741824f:F2} GB";
+            else
+            {
+                sizestr = $"{(_size >> 20) / 1024f:F2} GB";
             }
-            NameWithSize = $"{Name} ({sizestr})";
+            return sizestr;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-        public FileNode()
-        {
-            Name = "";
-            NameWithSize = "";
-            Icon = AppDomain.CurrentDomain.BaseDirectory + "\\file.png";
-            Childern = new List<FileNode>();
-            IsSelected = false;
-            IsFile = false;
-        }
-
-        public FileNode(string name)
-        {
-            Name = name;
-            NameWithSize = "";
-            Icon = AppDomain.CurrentDomain.BaseDirectory + "\\file.png";
-            Childern = new List<FileNode>();
-            IsSelected = false;
-            IsFile = false;
-        }
 
         public FileNode(string name, bool isFile, string fromChunk)
         {
@@ -126,16 +111,6 @@ namespace MHWNoChunk
             IsSelected = false;
             FromChunk = fromChunk;
             FromChunkName = $"({System.IO.Path.GetFileNameWithoutExtension(fromChunk)})";
-        }
-
-        public FileNode(string name, List<FileNode> children)
-        {
-            Name = name;
-            NameWithSize = "";
-            Icon = AppDomain.CurrentDomain.BaseDirectory + "\\file.png";
-            Childern = children;
-            IsSelected = false;
-            IsFile = false;
         }
     }
 }

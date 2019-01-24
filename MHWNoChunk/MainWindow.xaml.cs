@@ -69,6 +69,7 @@ namespace MHWNoChunk
             {
                 FileNode rootnode = itemlist[0];
                 total_progress = rootnode.getSelectedCount();
+                setProgressbarMax(total_progress);
             }
             if (total_progress == 0)
             {
@@ -175,13 +176,21 @@ namespace MHWNoChunk
             }));
         }
 
-        // Update progress bar
-        public void updateExtractProgress()
+        public void setProgressbarMax(int maxValue)
         {
-            extract_progress = extract_progress >= total_progress ? total_progress : extract_progress + 1;
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                progressbar.Value = extract_progress * 100 / total_progress;
+                progressbar.Maximum = maxValue;
+            }));
+        }
+
+        // Update progress bar
+        public void updateExtractProgress(int updateValue = 1)
+        {
+            extract_progress = extract_progress + updateValue >= total_progress ? total_progress : extract_progress + updateValue;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                progressbar.Value = extract_progress;
             }));
         }
 
