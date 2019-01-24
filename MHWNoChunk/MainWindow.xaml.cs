@@ -82,7 +82,7 @@ namespace MHWNoChunk
             }
 
             printlog("Export to: " + output_directory);
-            printlog("It may take a long time to extract all the files you selected which depends on the file size and count you selected.");
+            printlog("It may take a long time to extract all the files you selected which depends on the file size and amount you selected.");
             int failed = 0;
             if(CombineChecked) chunkMap.FirstOrDefault().Value.ExtractSelected(itemlist, output_directory, this);
             else failed = mainChunk.ExtractSelected(itemlist, output_directory, this);
@@ -110,7 +110,18 @@ namespace MHWNoChunk
                     if (CombineChecked) {
                         printlog("Combine mode on. The program will combine all the chunk files.");
                     }
-                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll")) { printlog("Error: oo2core_5_win64.dll not found. Copy the file from root path where your MHW game install at."); Console.Read(); return; }
+                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll")) {
+                        string oo2corePath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(filename)) + "\\oo2core_5_win64.dll";
+                        if (File.Exists(oo2corePath))
+                        {
+                            File.Copy(oo2corePath, $"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll");
+                            printlog($"Copied oo2core_5_win64.dll from {oo2corePath}");
+                        }
+                        else {
+                            printlog("Error: oo2core_5_win64.dll not found. Copy the file from your MHW game install path to the executable folder.");
+                            return;
+                        }
+                    }
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
                         CombineCheckBox.IsEnabled = false;
