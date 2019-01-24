@@ -21,6 +21,7 @@ namespace MHWNoChunk
 {
     public partial class MainWindow : Window
     {
+        public static bool CNMode = false;
         private string chunkfilename;
         static int MagicChunk = 0x00504D43;
         int MagicInputFile;
@@ -42,7 +43,17 @@ namespace MHWNoChunk
             extractworker = new BackgroundWorker();
             extractworker.WorkerSupportsCancellation = true;
             extractworker.DoWork += new DoWorkEventHandler(DoExtractHandler);
-            
+            initChinese();
+        }
+
+        private void initChinese() {
+            if (CNMode)
+            {
+                this.Title = "MHW部分解包器 v1.3.1 By Jodo @ 狩技MOD组";
+                LogBox.Text = "拖拽chunkN.bin至上方空白区域以开始。如果想要一次性解析全部chunk0-chunkN.bin，请先勾选右侧的联合解析全部Chunk。";
+                CombineCheckBox.Content = "联合解析全部Chunk";
+                ExtractBtn.Content = "提取所选文件";
+            }
         }
 
         private void item_SelectedItemChanged(object sender, RoutedEventArgs e)
@@ -80,45 +91,60 @@ namespace MHWNoChunk
                 }));
                 return;
             }
-
-            printlog("Export to: " + output_directory);
-            printlog("It may take a long time to extract all the files you selected which depends on the file size and amount you selected.");
+            if (!CNMode)
+            {
+                printlog("Export to: " + output_directory);
+                printlog("It may take a long time to extract all the files you selected which depends on the file size and amount you selected.");
+            }
+            else {
+                printlog("解包至: " + output_directory);
+                printlog("根据你所选取的文件数量和大小，这可能会花费很长时间，请耐心等待");
+            }
             int failed = 0;
             if(CombineChecked) chunkMap.FirstOrDefault().Value.ExtractSelected(itemlist, output_directory, this);
             else failed = mainChunk.ExtractSelected(itemlist, output_directory, this);
             if (failed > 0) {
-                printlog($"{failed} files failed to extract in total.");
+                if (!CNMode) printlog($"{failed} files failed to extract in total.");
+                else printlog($"总计{failed}个文件提取失败");
             }
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 ExtractBtn.IsEnabled = true;
             }));
-            printlog("Finished!");
+            if (!CNMode) printlog("Finished!");
+            else printlog("提取完成！");
         }
 
         // To analyze the chunkN.bin
         private void analyze(string filename)
         {
-            if (!File.Exists(filename)) { printlog("Error: file does not exist."); return; }
+            if (!File.Exists(filename)) {
+                if (!CNMode) printlog("Error: file does not exist.");
+                else printlog("错误：文件不存在");
+                return; }
 
             try
             {
                 using (BinaryReader Reader = new BinaryReader(File.Open(filename, FileMode.Open))) MagicInputFile = Reader.ReadInt32();
                 if (MagicInputFile == MagicChunk)
                 {
-                    printlog("Chunk detected，now analyzing...", true);
+                    if (!CNMode) printlog("Chunk detected，now analyzing...", true);
+                    else printlog("检测到chunk文件，正在解析...", true);
                     if (CombineChecked) {
-                        printlog("Combine mode on. The program will combine all the chunk files.");
+                        if (!CNMode) printlog("Combine mode on. The program will combine all the chunk files.");
+                        else printlog("联合解析已开启，程序将整合所有chunkN.bin文件");
                     }
                     if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll")) {
                         string oo2corePath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(filename)) + "\\oo2core_5_win64.dll";
                         if (File.Exists(oo2corePath))
                         {
                             File.Copy(oo2corePath, $"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll");
-                            printlog($"Copied oo2core_5_win64.dll from {oo2corePath}");
+                            if(!CNMode)printlog($"Copied oo2core_5_win64.dll from {oo2corePath}");
+                            else printlog($"已从{oo2corePath}拷贝oo2core_5_win64.dll文件");
                         }
                         else {
-                            printlog("Error: oo2core_5_win64.dll not found. Copy the file from your MHW game install path to the executable folder.");
+                            if (!CNMode) printlog("Error: oo2core_5_win64.dll not found. Copy the file from your MHW game install path to the executable folder.");
+                            else printlog("错误：未找到oo2core_5_win64.dll，请从你的怪物猎人：世界游戏安装目录拷贝该文件至本程序文件夹");
                             return;
                         }
                     }
@@ -141,7 +167,8 @@ namespace MHWNoChunk
                         mainChunk = new Chunk();
                         itemlist = mainChunk.AnalyzeChunk(filename, this, itemlist);
                     }
-                    printlog("Analyze finished.");
+                    if (!CNMode) printlog("Analyze finished.");
+                    else printlog("解析完成");
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
                         this.AllowDrop = false;
@@ -153,7 +180,8 @@ namespace MHWNoChunk
             }
             catch (Exception e)
             {
-                printlog("Error info is as follows:");
+                if (!CNMode) printlog("Error info is as follows:");
+                else printlog("错误信息如下：");
                 printlog(e.Message);
                 return;
             }
@@ -211,8 +239,8 @@ namespace MHWNoChunk
             if (output_directory.Equals(""))
             {
                 FolderBrowserDialog fbd = new FolderBrowserDialog();
-                fbd.Description = "Select the path where you want to export the files to and the program will create a chunkN directory.";
-
+                if (!CNMode) fbd.Description = "Select the path where you want to export the files to and the program will create a chunkN directory.";
+                else fbd.Description = "选择你想要解包至的文件夹，程序将在该目录自动创建一个chunkN文件夹";
                 if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     if (CombineChecked) { output_directory = fbd.SelectedPath + "\\chunk"; }
@@ -220,7 +248,8 @@ namespace MHWNoChunk
                 }
                 else
                 {
-                    printlog("Canceled.");
+                    if (!CNMode) printlog("Canceled.");
+                    else printlog("已取消");
                     return;
                 }
             }

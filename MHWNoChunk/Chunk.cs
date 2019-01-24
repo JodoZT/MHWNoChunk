@@ -22,7 +22,8 @@ namespace MHWNoChunk
         {
             fileinput = FileInput;
             FileInfo fileinputInfo = new FileInfo(fileinput);
-            mainwindow.printlog($"Now analyzing {fileinputInfo.Name}");
+            if(!MainWindow.CNMode)mainwindow.printlog($"Now analyzing {fileinputInfo.Name}");
+            else mainwindow.printlog($"正在解析 {fileinputInfo.Name}");
             ChunkCache = new Dictionary<int, byte[]>();
 
             List<FileNode> filelist = inputFileList;
@@ -34,7 +35,8 @@ namespace MHWNoChunk
             // Read header
             Reader.BaseStream.Seek(4, SeekOrigin.Begin);
             int ChunkCount = Reader.ReadInt32(); int ChunkPadding = ChunkCount.ToString().Length;
-            mainwindow.printlog($"{ChunkCount} subchunks detected.");
+            if (!MainWindow.CNMode) mainwindow.printlog($"{ChunkCount} subchunks detected.");
+            else mainwindow.printlog($"解析到{ChunkCount}个子chunk ");
 
             // Read file list
             DictCount = 0;
@@ -229,7 +231,8 @@ namespace MHWNoChunk
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.printlog($"Error occured while extracting {node.EntireName}{node.FromChunkName}, skipped. Please try again later.");
+                    if (!MainWindow.CNMode) mainWindow.printlog($"Error occured while extracting {node.EntireName}{node.FromChunkName}, skipped. Please try again later.");
+                    else mainWindow.printlog($"提取 {node.EntireName}{node.FromChunkName} 时发生错误，已跳过，请稍后重试");
                     Console.WriteLine(ex.StackTrace);
                     failed += 1;
                 }
