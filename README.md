@@ -18,6 +18,9 @@ Github link to WorldChunkTool: https://github.com/mhvuze/WorldChunkTool
 [Nexusmods Page](https://www.nexusmods.com/monsterhunterworld/mods/411)
 
 ## Updates:
+* v1.3.1:
+
+    Added progressbar value sight. Added auto copy oo2core.
 * v1.3.0:
 
     Added combine extract mode. Once combine and extract all files with all the newest version.
@@ -33,8 +36,8 @@ Github link to WorldChunkTool: https://github.com/mhvuze/WorldChunkTool
 
 ## Usage:
 0. The tool is developed based on __.net framework 4.7.2__. If you can't open the software properly, double click the .net framework 4.7.2.exe to install it(web install).
-1. Copy __oo2core_5_win64.dll__ from the root directory of you MHW game to the directory of "MHWNoChunk.exe".
+1. \*Copy __oo2core_5_win64.dll__ from the root directory of you MHW game to the directory of "MHWNoChunk.exe" if you don't use chunkN.bin file from the original path.
 2. Double click the "MHWNoChunk.exe" file to start.
-3. Drag and drop the chunkN.bin file you want to decompress to the blank area of the software GUI. Check the 'Combine all chunks' option on the right side if you want to once combine all chunkNs and extract with all the newest-versioned-files. 
+3. Drag and drop the chunkN.bin file you want to decompress to the blank area of the software GUI. Check the 'Combine all chunks' option on the right side before dragdrop if you want to once combine all chunkNs and extract with all the newest-versioned-files. 
 4. Check the checkbox of the files you want.
 5. Click the "Extract Selected" button and select the directory you want to export to.
