@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace MHWNoChunk
 {
@@ -156,6 +157,7 @@ namespace MHWNoChunk
                     {
                         FileInfo chosenChunkFileInfo = new FileInfo(filename);
                         string[] chunkfiles = Directory.GetFiles(chosenChunkFileInfo.DirectoryName, "chunk*.bin");
+                        Array.Sort(chunkfiles, (a, b) => int.Parse(Regex.Replace(a, "[^0-9]", "")) - int.Parse(Regex.Replace(b, "[^0-9]", "")));
                         foreach (string filenameEach in chunkfiles)
                         {
                             Chunk cur_chunk = new Chunk();
