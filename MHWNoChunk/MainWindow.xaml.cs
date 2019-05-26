@@ -50,7 +50,7 @@ namespace MHWNoChunk
         private void initChinese() {
             if (CNMode)
             {
-                this.Title = "MHW部分解包器 v1.3.1 By Jodo @ 狩技MOD组";
+                this.Title = "MHW部分解包器 v1.3.2 By Jodo @ 狩技MOD组";
                 LogBox.Text = "拖拽chunkN.bin至上方空白区域以开始。如果想要一次性解析全部chunk0-chunkN.bin，请先勾选右侧的联合解析全部Chunk。";
                 CombineCheckBox.Content = "联合解析全部Chunk";
                 ExtractBtn.Content = "提取所选文件";

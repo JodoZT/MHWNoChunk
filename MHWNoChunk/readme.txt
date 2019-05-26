@@ -10,6 +10,8 @@ Nexusmods link to ﻿WorldChunkTool :https://www.nexusmods.com/monsterhunterworl
 ﻿This tool can decompress part of the MHW chunk file as you want. 
 ﻿2x speed and 0.5x disk usage. No .PKG file created.
 
+v1.3.2 update:
+Fixed bug while extracting with chunk10. Thanks KeisukeOkaya for his work.
 ﻿v1.3.1 update:
 ﻿﻿Added progressbar value sight. Added auto copy .dll file.
 ﻿v1.3.0 update:
@@ -43,6 +45,7 @@ WorldChunkTool GitHub链接: https://github.com/mhvuze/WorldChunkTool
 ﻿
 自选解包，一步到位，立等可取，不需要生成中间文件浪费空间，2x速度，0.5x磁盘占用。
 
+v1.3.2 修复因chunk10导致的解包错误，感谢KeisukeOkaya为此所作的工作
 v1.3.1 增加进度条数值显示，增加自动复制oo2core功能
 v1.3.0 增加全chunk联合解包模式，一次性解析所有chunk并解包相应最新文件，先勾选“”联合解析全部chunk”并随意拖入一个chunkN.bin即可开始联合解包
 v1.2.1 修复大文件解包错误
