@@ -29,7 +29,7 @@
                 </TreeView>
                 <Button x:Name="ExtractBtn" Content="Extract selected" Canvas.Left="947" Canvas.Top="677" Width="243" Height="81" FontSize="28" IsEnabled="False" Click="ExtractBtn_Click" ClickMode="Release" Background="Green"/>
                 <ProgressBar x:Name="progressbar" Height="34" Canvas.Left="10" Canvas.Top="763" Width="1180" Maximum="100"/>
-                <CheckBox x:Name="CombineCheckBox"  Content="Combine all chunks" Canvas.Left="947" Canvas.Top="644" Height="28" Width="243" VerticalContentAlignment="Center" FontSize="20" Checked="CombineCheckBox_Checked" Unchecked="CombineCheckBox_Unchecked"/>
+                <CheckBox x:Name="CombineCheckBox"  Content="Merge all chunks" Canvas.Left="947" Canvas.Top="644" Height="28" Width="243" VerticalContentAlignment="Center" FontSize="20" Checked="CombineCheckBox_Checked" Unchecked="CombineCheckBox_Unchecked"/>
                 <Label Content="{Binding Value, ElementName=progressbar}" Canvas.Left="391" Canvas.Top="763" Height="34" Width="193" HorizontalContentAlignment="Right" FontSize="20"/>
                 <Label Content="/" Canvas.Left="588" Canvas.Top="761" Height="34" Width="19" FontSize="20"/>
                 <Label Content="{Binding Maximum, ElementName=progressbar}" Canvas.Left="607" Canvas.Top="763" Height="34" Width="199"  HorizontalContentAlignment="Left" FontSize="20"/>
