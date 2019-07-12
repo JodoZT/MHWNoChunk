@@ -1,5 +1,5 @@
 # MHWNoChunk
-__Sectional MHW chunk decompress tool__
+__Sectional Monster Hunter : World chunk decompress tool__
 
 The tool learns from the __WorldChunkTool__ to deal with the decompressing process.
 
