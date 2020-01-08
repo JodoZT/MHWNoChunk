@@ -1,4 +1,6 @@
 # MHWNoChunk
+
+# NOTICE: The tool WON'T WORK WITH THE ICEBOREN UPDATE SO FAR. Please wait for an update patiently. Thanks.
 __Sectional Monster Hunter : World chunk decompress tool__
 
 The tool learns from the __WorldChunkTool__ to deal with the decompressing process.
@@ -18,6 +20,9 @@ Github link to WorldChunkTool: https://github.com/mhvuze/WorldChunkTool
 [Nexusmods Page](https://www.nexusmods.com/monsterhunterworld/mods/411)
 
 ## Updates:
+* v1.3.2:
+
+    Fixed bug while extracting with chunk10+. Thanks KeisukeOkaya for his work.
 * v1.3.1:
 
     Added progressbar value sight. Added auto copy oo2core.
