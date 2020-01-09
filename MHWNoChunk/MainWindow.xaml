@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MHWNoChunk"
         mc:Ignorable="d"
-        Title="MHWNoChunk v1.3.2 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
+        Title="MHWNoChunk v2.0.0 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
     <Grid x:Name="maingrid" AllowDrop="True">
         <Viewbox Stretch="Fill" Grid.ColumnSpan="2">
             <Canvas Width="1200" Height="807">
-                <TextBox x:Name="LogBox" HorizontalAlignment="Left" Height="119" TextWrapping="Wrap" Text="Drag and drop chunkN.bin into the black area above. Check the 'Combine all chunks' option on the right side before dragdrop if you want to merge all chunkNs and extract with all the newest version files." VerticalAlignment="Top" Width="932" Canvas.Left="10" Canvas.Top="639" FontSize="18" IsReadOnly="True"/>
+                <TextBox x:Name="LogBox" HorizontalAlignment="Left" Height="119" TextWrapping="Wrap" Text="Drag and drop chunkN.bin into the black area above. Check the 'Combine all chunks' option on the right side before dragdrop if you want to merge all chunkNs and extract with all the newest version files.Learns from WorldChunkTool by MHVuze: https://github.com/mhvuze/WorldChunkTool" VerticalAlignment="Top" Width="932" Canvas.Left="10" Canvas.Top="639" FontSize="18" IsReadOnly="True"/>
                 <TreeView x:Name="FileTree" HorizontalAlignment="Left" Height="629" VerticalAlignment="Top" Width="1180" Canvas.Left="10" Canvas.Top="10">
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding Childern}">

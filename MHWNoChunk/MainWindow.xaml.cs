@@ -50,8 +50,8 @@ namespace MHWNoChunk
         private void initChinese() {
             if (CNMode)
             {
-                this.Title = "MHW部分解包器 v1.3.2 By Jodo @ 狩技MOD组";
-                LogBox.Text = "拖拽chunkN.bin至上方空白区域以开始。如果想要一次性解析全部chunk0-chunkN.bin，请先勾选右侧的联合解析全部Chunk。";
+                this.Title = "MHW部分解包器 v2.0.0 By Jodo @ 狩技MOD组";
+                LogBox.Text = "拖拽chunkN.bin至上方空白区域以开始。如果想要一次性解析全部chunk0-chunkN.bin，请先勾选右侧的联合解析全部Chunk。本程序根据 WorldChunkTool by MHVuze的原理制作: https://github.com/mhvuze/WorldChunkTool";
                 CombineCheckBox.Content = "联合解析全部Chunk";
                 ExtractBtn.Content = "提取所选文件";
             }
@@ -135,19 +135,10 @@ namespace MHWNoChunk
                         if (!CNMode) printlog("Combine mode on. The program will combine all the chunk files.");
                         else printlog("联合解析已开启，程序将整合所有chunkN.bin文件");
                     }
-                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll")) {
-                        string oo2corePath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(filename)) + "\\oo2core_5_win64.dll";
-                        if (File.Exists(oo2corePath))
-                        {
-                            File.Copy(oo2corePath, $"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_5_win64.dll");
-                            if(!CNMode)printlog($"Copied oo2core_5_win64.dll from {oo2corePath}");
-                            else printlog($"已从{oo2corePath}拷贝oo2core_5_win64.dll文件");
-                        }
-                        else {
-                            if (!CNMode) printlog("Error: oo2core_5_win64.dll not found. Copy the file from your MHW game install path to the executable folder.");
-                            else printlog("错误：未找到oo2core_5_win64.dll，请从你的怪物猎人：世界游戏安装目录拷贝该文件至本程序文件夹");
-                            return;
-                        }
+                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_8_win64.dll")) {
+                        if (!CNMode) printlog("Error: oo2core_5_win64.dll not found. Download the file from elsewhere to the executable folder.");
+                        else printlog("错误：未找到oo2core_8_win64.dll，请从其他地方下载该文件至本程序文件夹");
+                        return;
                     }
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -156,7 +147,7 @@ namespace MHWNoChunk
                     if (CombineChecked)
                     {
                         FileInfo chosenChunkFileInfo = new FileInfo(filename);
-                        string[] chunkfiles = Directory.GetFiles(chosenChunkFileInfo.DirectoryName, "chunk*.bin");
+                        string[] chunkfiles = Directory.GetFiles(chosenChunkFileInfo.DirectoryName, "chunkG*.bin");
                         Array.Sort(chunkfiles, (a, b) => int.Parse(Regex.Replace(a, "[^0-9]", "")) - int.Parse(Regex.Replace(b, "[^0-9]", "")));
                         foreach (string filenameEach in chunkfiles)
                         {
