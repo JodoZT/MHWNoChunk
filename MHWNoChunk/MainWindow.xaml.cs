@@ -25,6 +25,7 @@ namespace MHWNoChunk
         public static bool CNMode = false;
         public static bool DebugMode = true;
         public static bool EnableCache = true;
+        public static bool splitByChunk = false;
         private string chunkfilename;
         static int MagicChunk = 0x00504D43;
         int MagicInputFile;
@@ -37,6 +38,25 @@ namespace MHWNoChunk
         bool CombineChecked = false;
         Dictionary<string, Chunk> chunkMap = new Dictionary<string, Chunk>();
 
+        public static Dictionary<int, string> recommandDict = new Dictionary<int, string>() {
+            { -1, "-1"},
+            { 0, "6,3,14"},
+            { 1, "4,6,3"},
+            { 2, "9,1,0"},
+            { 3, "7,2,10"},
+            { 4, "8,12,7"},
+            { 5, "3,14,8"},
+            { 6, "12,7,2"},
+            { 7, "11,9,1"},
+            { 8, "10,13,11"},
+            { 9, "15,4,6"},
+            { 10, "1,0,5"},
+            { 11, "5,15,4"},
+            { 12, "13,11,9"},
+            { 13, "0,5,15"},
+            { 14, "2,10,13"},
+            { 15, "14,8,12"}
+        };
         public static int forceKey = -1;
         public MainWindow()
         {
@@ -46,6 +66,7 @@ namespace MHWNoChunk
             if (!DebugMode) {
                 ForceKey.Visibility = Visibility.Hidden;
                 ForceKeyLabel.Visibility = Visibility.Hidden;
+                RecommandLabel.Visibility = Visibility.Hidden;
             }
             analyzeworker = new BackgroundWorker();
             analyzeworker.WorkerSupportsCancellation = true;
@@ -272,6 +293,7 @@ namespace MHWNoChunk
         private void ForceKey_Selected(object sender, RoutedEventArgs e)
         {
             forceKey = (int)ForceKey.SelectedValue;
+            RecommandLabel.Content = $"RecommandNext:{recommandDict[forceKey]}";
             if (forceKey != -1)
             {
                 EnableCache = false;
@@ -281,6 +303,11 @@ namespace MHWNoChunk
                 EnableCache = true;
                 printlog("Cache enabled.");
             }
+        }
+
+        private void SplitCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            splitByChunk = (bool)SplitCheckBox.IsChecked;
         }
 
         public Chunk getChunk(string chunkfile) {

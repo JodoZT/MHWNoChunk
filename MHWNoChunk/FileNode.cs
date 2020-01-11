@@ -22,6 +22,7 @@ namespace MHWNoChunk
         public string NameWithSize { get; set; }
         public string FromChunk { get; set; }
         public string FromChunkName { get; set; }
+        public int CrossChunkCnt { get; set; }
 
         private bool isSelected;
 
@@ -65,7 +66,14 @@ namespace MHWNoChunk
                 {
                     crossChunkCnt = (int)((Size - (0x40000 - ChunkPointer)) / 0x40000) + 2;
                 }
+                CrossChunkCnt = crossChunkCnt;
                 FromChunkName += $"(Idx {ChunkIndex}(Offset{ChunkPointer}) - Idx {ChunkIndex + crossChunkCnt - 1}(Offset{(Size + ChunkPointer - 1) % 0x40000}))";
+                bool canExtract = true;
+                for (int i = 0; i < CrossChunkCnt; i++) {
+                    if (Chunk.chunkKeyPattern[ChunkIndex + i] > 0xF) { canExtract = false; break; }
+                }
+                if (canExtract) FromChunkName += " √";
+                else FromChunkName += " ×";
                 setNameWithSize(Name, Size); return Size; }
             else
             {
@@ -118,7 +126,7 @@ namespace MHWNoChunk
             IsSelected = false;
             FromChunk = fromChunk;
             FromChunkName = $"({System.IO.Path.GetFileNameWithoutExtension(fromChunk)})";
-            
+            CrossChunkCnt = 1;
         }
     }
 }
