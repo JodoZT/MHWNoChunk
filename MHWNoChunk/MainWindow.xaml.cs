@@ -120,6 +120,7 @@ namespace MHWNoChunk
                 FileNode rootnode = itemlist[0];
                 total_progress = rootnode.getSelectedCount();
                 setProgressbarMax(total_progress);
+                setProgressbar(0, total_progress);
             }
             if (total_progress == 0)
             {

@@ -276,12 +276,6 @@ namespace MHWNoChunk
                                         }
                                     }
                                 }
-                                if(!MainWindow.CNMode)mainWindow.printlog($"{node.EntireName} extracted");
-                                else mainWindow.printlog($"{node.EntireName} 已提取");
-                            }
-                            else {
-                                if (!MainWindow.CNMode) mainWindow.printlog($"{node.EntireName} skipped");
-                                else mainWindow.printlog($"{node.EntireName} 已跳过");
                             }
                             mainWindow.updateExtractProgress();
                         }
