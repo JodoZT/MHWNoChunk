@@ -136,9 +136,16 @@ namespace MHWNoChunk
                         else printlog("联合解析已开启，程序将整合所有chunkN.bin文件");
                     }
                     if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_8_win64.dll")) {
-                        if (!CNMode) printlog("Error: oo2core_5_win64.dll not found. Download the file from elsewhere to the executable folder.");
-                        else printlog("错误：未找到oo2core_8_win64.dll，请从其他地方下载该文件至本程序文件夹");
-                        return;
+                        if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_7_win64.dll"))
+                        {
+                            if (!CNMode) printlog("Error: oo2core_8_win64.dll not found. Download the file from elsewhere to the executable folder.");
+                            else printlog("错误：未找到oo2core_8_win64.dll，请从其他地方下载该文件至本程序文件夹");
+                            return;
+                        }
+                        else {
+                            File.Copy($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_7_win64.dll",$"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_8_win64.dll", true);
+                        }
+                        
                     }
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
