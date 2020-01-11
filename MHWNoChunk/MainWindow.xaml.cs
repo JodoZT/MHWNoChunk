@@ -26,6 +26,11 @@ namespace MHWNoChunk
         public static bool DebugMode = true;
         public static bool EnableCache = true;
         public static bool splitByChunk = false;
+        public static bool regexEnabled = false;
+        public static bool correctOnly = false;
+        public static string filterText = "";
+        public static bool filterEnabled = false;
+        public static Regex filterRegex = null;
         private string chunkfilename;
         static int MagicChunk = 0x00504D43;
         int MagicInputFile;
@@ -84,6 +89,9 @@ namespace MHWNoChunk
                 LogBox.Text = "拖拽chunkN.bin至上方空白区域以开始。如果想要一次性解析全部chunk0-chunkN.bin，请先勾选右侧的联合解析全部Chunk。本程序根据 WorldChunkTool by MHVuze的原理制作: https://github.com/mhvuze/WorldChunkTool";
                 CombineCheckBox.Content = "联合解析全部Chunk";
                 ExtractBtn.Content = "提取所选文件";
+                FilterLabel.Content = "筛选:";
+                RegExCheckBox.Content = "正则表达式";
+                CorrectOnlyCheckBox.Content = "仅正确文件";
             }
         }
 
@@ -119,6 +127,9 @@ namespace MHWNoChunk
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ExtractBtn.IsEnabled = true;
+                    RegExCheckBox.IsEnabled = true;
+                    CorrectOnlyCheckBox.IsEnabled = true;
+                    FilterBox.IsEnabled = true;
                 }));
                 return;
             }
@@ -132,7 +143,14 @@ namespace MHWNoChunk
                 printlog("根据你所选取的文件数量和大小，这可能会花费很长时间，请耐心等待");
             }
             int failed = 0;
-            if(CombineChecked) chunkMap.FirstOrDefault().Value.ExtractSelected(itemlist, output_directory, this);
+            if (filterText != "")
+            {
+                filterEnabled = true;
+                if (regexEnabled) filterRegex = new Regex(filterText);
+                else filterRegex = null;
+            }
+            else filterEnabled = false;
+            if (CombineChecked) chunkMap.FirstOrDefault().Value.ExtractSelected(itemlist, output_directory, this);
             else failed = mainChunk.ExtractSelected(itemlist, output_directory, this);
             if (failed > 0) {
                 if (!CNMode) printlog($"{failed} files failed to extract in total.");
@@ -141,6 +159,9 @@ namespace MHWNoChunk
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 ExtractBtn.IsEnabled = true;
+                RegExCheckBox.IsEnabled = true;
+                CorrectOnlyCheckBox.IsEnabled = true;
+                FilterBox.IsEnabled = true;
             }));
             if (!CNMode) printlog("Finished!");
             else printlog("提取完成！");
@@ -277,6 +298,9 @@ namespace MHWNoChunk
                 }
             }
             ExtractBtn.IsEnabled = false;
+            RegExCheckBox.IsEnabled = false;
+            CorrectOnlyCheckBox.IsEnabled = false;
+            FilterBox.IsEnabled = false;
             extractworker.RunWorkerAsync();
         }
 
@@ -308,6 +332,21 @@ namespace MHWNoChunk
         private void SplitCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             splitByChunk = (bool)SplitCheckBox.IsChecked;
+        }
+
+        private void RegExCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            regexEnabled = (bool)RegExCheckBox.IsChecked;
+        }
+
+        private void CorrectOnlyCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            correctOnly = (bool)CorrectOnlyCheckBox.IsChecked;
+        }
+
+        private void FilterBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            filterText = FilterBox.Text;
         }
 
         public Chunk getChunk(string chunkfile) {

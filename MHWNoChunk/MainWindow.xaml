@@ -37,6 +37,10 @@
                 <Label x:Name="ForceKeyLabel" Content="Force Key" Canvas.Left="651" Canvas.Top="735"/>
                 <Label x:Name="RecommandLabel" Content="Recommand next:-1" Canvas.Left="780" Canvas.Top="735" Height="28" Width="162"/>
                 <CheckBox x:Name="SplitCheckBox"  Content="SplitByChunk" Canvas.Left="547" Canvas.Top="741" Checked="SplitCheckBox_Checked" Unchecked="SplitCheckBox_Checked"/>
+                <TextBox x:Name="FilterBox" Height="23" Canvas.Left="961" TextWrapping="Wrap" Text="" Canvas.Top="10" Width="229" KeyUp="FilterBox_KeyUp"/>
+                <Label x:Name="FilterLabel" Content="Filter:" Canvas.Left="919" Canvas.Top="8"/>
+                <CheckBox x:Name="RegExCheckBox" Content="Regular Expression" Canvas.Left="960" Canvas.Top="33" Height="16" Width="128" Checked="RegExCheckBox_Checked" Unchecked="RegExCheckBox_Checked"/>
+                <CheckBox x:Name="CorrectOnlyCheckBox" Content="Correct Only" Canvas.Left="1092" Canvas.Top="34" Width="124" Checked="CorrectOnlyCheckBox_Checked" Unchecked="CorrectOnlyCheckBox_Checked"/>
             </Canvas>
         </Viewbox>
     </Grid>
