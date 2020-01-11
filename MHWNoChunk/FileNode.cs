@@ -59,7 +59,14 @@ namespace MHWNoChunk
         }
 
         public long getSize() {
-            if (IsFile) { setNameWithSize(Name, Size); return Size; }
+            if (IsFile) {
+                int crossChunkCnt = 1;
+                if (Size > 0x40000 - ChunkPointer)
+                {
+                    crossChunkCnt = (int)((Size - (0x40000 - ChunkPointer)) / 0x40000) + 2;
+                }
+                FromChunkName += $"(Idx {ChunkIndex}(Offset{ChunkPointer}) - Idx {ChunkIndex + crossChunkCnt - 1}(Offset{(Size + ChunkPointer - 1) % 0x40000}))";
+                setNameWithSize(Name, Size); return Size; }
             else
             {
                 long _size = 0;
@@ -85,15 +92,15 @@ namespace MHWNoChunk
             }
             else if (_size >= 1024 && _size < 1048576)
             {
-                sizestr = $"{_size / 1024f:F2} KB";
+                sizestr = $"{_size / 1024f:F2} KB({_size}B)";
             }
             else if (_size < 1073741824 && _size >= 1048576)
             {
-                sizestr = $"{(_size >> 10) / 1024f:F2} MB";
+                sizestr = $"{(_size >> 10) / 1024f:F2} MB({_size}B)";
             }
             else
             {
-                sizestr = $"{(_size >> 20) / 1024f:F2} GB";
+                sizestr = $"{(_size >> 20) / 1024f:F2} GB({_size}B)";
             }
             return sizestr;
         }
@@ -111,6 +118,7 @@ namespace MHWNoChunk
             IsSelected = false;
             FromChunk = fromChunk;
             FromChunkName = $"({System.IO.Path.GetFileNameWithoutExtension(fromChunk)})";
+            
         }
     }
 }

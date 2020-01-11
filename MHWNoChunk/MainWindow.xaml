@@ -33,6 +33,8 @@
                 <Label Content="{Binding Value, ElementName=progressbar}" Canvas.Left="391" Canvas.Top="763" Height="34" Width="193" HorizontalContentAlignment="Right" FontSize="20"/>
                 <Label Content="/" Canvas.Left="588" Canvas.Top="761" Height="34" Width="19" FontSize="20"/>
                 <Label Content="{Binding Maximum, ElementName=progressbar}" Canvas.Left="607" Canvas.Top="763" Height="34" Width="199"  HorizontalContentAlignment="Left" FontSize="20"/>
+                <ComboBox x:Name="ForceKey"  Canvas.Left="886" Canvas.Top="735" Width="54" SelectionChanged="ForceKey_Selected"/>
+                <Label x:Name="ForceKeyLabel" Content="Force Key" Canvas.Left="819" Canvas.Top="735"/>
             </Canvas>
         </Viewbox>
     </Grid>

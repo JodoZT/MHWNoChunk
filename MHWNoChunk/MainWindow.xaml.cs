@@ -23,6 +23,8 @@ namespace MHWNoChunk
     public partial class MainWindow : Window
     {
         public static bool CNMode = false;
+        public static bool DebugMode = true;
+        public static bool EnableCache = true;
         private string chunkfilename;
         static int MagicChunk = 0x00504D43;
         int MagicInputFile;
@@ -35,9 +37,16 @@ namespace MHWNoChunk
         bool CombineChecked = false;
         Dictionary<string, Chunk> chunkMap = new Dictionary<string, Chunk>();
 
+        public static int forceKey = -1;
         public MainWindow()
         {
             InitializeComponent();
+            ForceKey.ItemsSource = new List<int>() {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,-1};
+            ForceKey.SelectedIndex = 16;
+            if (!DebugMode) {
+                ForceKey.Visibility = Visibility.Hidden;
+                ForceKeyLabel.Visibility = Visibility.Hidden;
+            }
             analyzeworker = new BackgroundWorker();
             analyzeworker.WorkerSupportsCancellation = true;
             analyzeworker.DoWork += new DoWorkEventHandler(DoAnalyzeHandler);
@@ -136,7 +145,7 @@ namespace MHWNoChunk
                         else printlog("联合解析已开启，程序将整合所有chunkN.bin文件");
                     }
                     if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_8_win64.dll")) {
-                        if (!CNMode) printlog("Error: oo2core_5_win64.dll not found. Download the file from elsewhere to the executable folder.");
+                        if (!CNMode) printlog("Error: oo2core_8_win64.dll not found. Download the file from elsewhere to the executable folder.");
                         else printlog("错误：未找到oo2core_8_win64.dll，请从其他地方下载该文件至本程序文件夹");
                         return;
                     }
@@ -258,6 +267,20 @@ namespace MHWNoChunk
         private void CombineCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             CombineChecked = false;
+        }
+
+        private void ForceKey_Selected(object sender, RoutedEventArgs e)
+        {
+            forceKey = (int)ForceKey.SelectedValue;
+            if (forceKey != -1)
+            {
+                EnableCache = false;
+                printlog("Cache disabled.");
+            }
+            else {
+                EnableCache = true;
+                printlog("Cache enabled.");
+            }
         }
 
         public Chunk getChunk(string chunkfile) {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace MHWNoChunk
 {
@@ -64,11 +65,13 @@ namespace MHWNoChunk
                 ChunkOffsetDict.Add(i, ChunkOffset);
                 DictCount = i + 1;
             }
+            //For analyze
+            //StringBuilder sb = new StringBuilder();
+            //sb.Append("FileAddress, FromChunkBin, OffsetInChunkBin, ChunkIndex, OffsetInSingleChunk, FileSize(B)\n");
 
             cur_index = 0;
             long cur_offset = ChunkOffsetDict[cur_index];
             long cur_size = MetaChunk[cur_offset];
-
             ChunkDecompressed = getDecompressedChunk(cur_offset, cur_size, Reader, cur_index);
             if (cur_index + 1 < DictCount)
             {
@@ -143,6 +146,8 @@ namespace MHWNoChunk
                         child_node.ChunkPointer = (int)(FileOffset % 0x40000);
                     }
                     child_node.EntireName = StringNameChild;
+                    //For analyze
+                    //if(isFile)sb.Append($"{child_node.EntireName},{fileinputInfo.Name},{child_node.Offset},{child_node.ChunkIndex},{child_node.ChunkPointer},{child_node.Size}\n");
                     FileNode target_node = root_node;
                     foreach (string node_name in fathernodes)
                     {
@@ -180,12 +185,15 @@ namespace MHWNoChunk
             {
                 filelist[0].getSize();
             }
+            //For Analyze
+            //File.WriteAllText($"ChunkInfo-{fileinputInfo.Name}.csv", sb.ToString());
             return filelist;
         }
 
         //Extact function
         public int ExtractSelected(List<FileNode> itemlist, string BaseLocation, MainWindow mainWindow)
         {
+            if (!MainWindow.EnableCache) ChunkCache.Clear();
             int failed = 0;
             foreach (FileNode node in itemlist)
             {
@@ -209,7 +217,7 @@ namespace MHWNoChunk
                         {
                             if (CurNodeChunk.ChunkCache.Count > 20) CurNodeChunk.ChunkCache.Clear();
                             CurNodeChunk.ChunkDecompressed = CurNodeChunk.getDecompressedChunk(CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index], CurNodeChunk.MetaChunk[CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index]], CurNodeChunk.Reader, CurNodeChunk.cur_index);
-                            CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index, CurNodeChunk.ChunkDecompressed);
+                            if (MainWindow.EnableCache)CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index, CurNodeChunk.ChunkDecompressed);
                         }
                         if (CurNodeChunk.ChunkCache.ContainsKey(CurNodeChunk.cur_index + 1))
                         {
@@ -220,7 +228,7 @@ namespace MHWNoChunk
                             if (CurNodeChunk.ChunkCache.Count > 20) CurNodeChunk.ChunkCache.Clear();
                             if (CurNodeChunk.cur_index + 1 < CurNodeChunk.DictCount) { CurNodeChunk.NextChunkDecompressed = CurNodeChunk.getDecompressedChunk(CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index + 1], CurNodeChunk.MetaChunk[CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index + 1]], CurNodeChunk.Reader, CurNodeChunk.cur_index + 1); }
                             else { CurNodeChunk.NextChunkDecompressed = new byte[0]; }
-                            CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index + 1, CurNodeChunk.NextChunkDecompressed);
+                            if(MainWindow.EnableCache)CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index + 1, CurNodeChunk.NextChunkDecompressed);
                         }
                         if (!node.IsFile) new FileInfo(BaseLocation + node.EntireName + "\\").Directory.Create();
                         else new FileInfo(BaseLocation + node.EntireName).Directory.Create();
@@ -245,8 +253,7 @@ namespace MHWNoChunk
         //To get decompressed chunk
         private byte[] getDecompressedChunk(long offset, long size, BinaryReader reader, int chunkNum)
         {
-
-            if (size != 0)
+            try {if (size != 0)
             {
                 reader.BaseStream.Seek(offset, SeekOrigin.Begin);
                 byte[] ChunkCompressed = reader.ReadBytes((int)size); // Unsafe cast
@@ -255,8 +262,14 @@ namespace MHWNoChunk
             else
             {
                 reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-                return reader.ReadBytes(0x40000);
+                return DecryptChunk(reader.ReadBytes(0x40000), GetChunkKey(chunkNum));
+            } }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.StackTrace);
+                return null;
             }
+
         }
 
         //To read an ASCII string from chunk bytes
@@ -341,13 +354,14 @@ namespace MHWNoChunk
                 // ec13345966ce7312440089a2ceddcee9
                 new byte[] { 0xec, 0x13, 0x34, 0x59, 0x66, 0xce, 0x73, 0x12, 0x44, 0x00, 0x89, 0xa2, 0xce, 0xdd, 0xce, 0xe9 }
             };
-
+            if (MainWindow.forceKey != -1) {
+                return chunkKeys[MainWindow.forceKey];
+            }
             List<int> chunkKeyPattern = new List<int> { 11, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 3, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 12, 13, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 11, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 1, 4, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 11, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 14, 2, 9, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 12, 11, 5, 3, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 1, 6, 12, 13, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 0, 6, 12, 11, 5, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 8, 10, 1, 6, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 9, 15, 14, 10, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 14, 2, 1, 4, 8, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 12, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 2, 1, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 1, 4, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 1, 6, 12, 11, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15, 8, 10, 0, 6, 7, 11, 5, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 14, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 14, 10, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 14, 10, 1, 3, 7, 11, 15, 14, 10, 1, 4, 12, 13, 5, 3, 7, 9, 15, 8, 10, 0, 6, 7, 9, 15, 8, 10, 1, 6, 12, 11, 5, 3, 2, 9, 4, 8, 10, 0, 6, 7, 9, 15, 8, 10, 0, 6, 12, 11, 5, 14, 2, 9, 4, 8, 13, 0, 6, 7, 11, 15, 8, 10, 0, 6, 7, 11, 5, 14, 2, 1, 4, 8, 13, 0, 3, 7, 11, 15, 14, 13, 0, 6, 7, 11, 15, 14, 2, 1, 4, 12, 13, 0, 3, 7, 9, 15, 8, 10, 0, 3, 7, 9, 15, 14, 10, 1, 6, 12, 13, 5, 3, 2, 9, 15 };
             int keyPos = chunkKeyPattern[i];
             byte[] chunkKey = chunkKeys[keyPos];
             return chunkKey;
         }
-
 
         // Decrypt Iceborne PKG chunks. Copy from WorldChunkTool.
         public static byte[] DecryptChunk(byte[] data, byte[] chunkKey)
