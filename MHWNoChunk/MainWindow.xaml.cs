@@ -137,11 +137,11 @@ namespace MHWNoChunk
             }
             if (!CNMode)
             {
-                printlog("Export to: " + output_directory);
+                printlog("Export to: " + output_directory, true);
                 printlog("It may take a long time to extract all the files you selected which depends on the file size and amount you selected.");
             }
             else {
-                printlog("解包至: " + output_directory);
+                printlog("解包至: " + output_directory, true);
                 printlog("根据你所选取的文件数量和大小，这可能会花费很长时间，请耐心等待");
             }
             int failed = 0;
