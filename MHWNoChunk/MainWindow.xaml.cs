@@ -45,22 +45,22 @@ namespace MHWNoChunk
 
         public static Dictionary<int, string> recommandDict = new Dictionary<int, string>() {
             { -1, "-1"},
-            { 0, "6,3,14"},
-            { 1, "4,6,3"},
-            { 2, "9,1,0"},
-            { 3, "7,2,10"},
-            { 4, "8,12,7"},
-            { 5, "3,14,8"},
-            { 6, "12,7,2"},
-            { 7, "11,9,1"},
-            { 8, "10,13,11"},
-            { 9, "15,4,6"},
-            { 10, "1,0,5"},
-            { 11, "5,15,4"},
-            { 12, "13,11,9"},
-            { 13, "0,5,15"},
-            { 14, "2,10,13"},
-            { 15, "14,8,12"}
+            { 0, "14,5,15"},
+            { 1, "4,11,3"},
+            { 2, "6,14,5"},
+            { 3, "13,6,14"},
+            { 4, "0,7,13"},
+            { 5, "9,12,10"},
+            { 6, "8,1,9"},
+            { 7, "5,15,8"},
+            { 8, "10,4,11"},
+            { 9, "11,3,2"},
+            { 10, "2,0,7"},
+            { 11, "7,13,6"},
+            { 12, "3,2,0"},
+            { 13, "15,8,1"},
+            { 14, "1,9,12"},
+            { 15, "12,10,4"},
         };
         public static int forceKey = -1;
         public MainWindow()
@@ -123,7 +123,8 @@ namespace MHWNoChunk
             }
             if (total_progress == 0)
             {
-                printlog("Nothing selected.");
+                if (!CNMode) printlog("Nothing selected.");
+                else printlog("未选择任何文件");
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ExtractBtn.IsEnabled = true;
