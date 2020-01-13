@@ -43,7 +43,7 @@ Github link to WorldChunkTool: https://github.com/mhvuze/WorldChunkTool
 
 ## Usage:
 0. The tool is developed based on __.net framework 4.7.2__. If you can't open the software properly, double click the .net framework 4.7.2.exe to install it(web install).
-1. \*Copy __oo2core_8_win64.dll__ from the somewhere else(like Warframe) to the directory of "MHWNoChunk.exe" if you don't use chunkN.bin file from the original path.
+1. \*Copy __oo2core_8_win64.dll__ from the somewhere else(like Warframe) to the directory of "MHWNoChunk.exe".
 2. Double click the "MHWNoChunk.exe" file to start.
 3. Drag and drop the chunkN.bin file you want to decompress to the blank area of the software GUI. Check the 'Combine all chunks' option on the right side before dragdrop if you want to once combine all chunkNs and extract with all the newest-versioned-files. 
 4. Check the checkbox of the files you want.
