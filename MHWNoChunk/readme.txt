@@ -27,7 +27,7 @@ Fixed bug while extracting with chunk10. Thanks KeisukeOkaya for his work.
 
 ﻿Usage:
 ﻿﻿0.The tool requires .net framework 4.7.2. If you can't open the software properly, download it from  https://dotnet.microsoft.com/download/dotnet-framework-runtime.
-﻿﻿1.*Copy oo2core_8_win64.dll from somewhere else to the directory of "MHWNoChunk.exe"  if you don't use chunkN.bin file from the original path.
+﻿﻿1.*Copy oo2core_8_win64.dll from somewhere else(like Warframe) to the directory of "MHWNoChunk.exe".
 ﻿﻿2.Double click the "MHWNoChunk.exe" file to start.
 ﻿﻿3.Drag and drop a chunk*.bin file you want to decompress from chunk directory of your MHW root folder to the blank area of the software GUI. Check the 'Combine all chunks' option on the right side before dragdrop file if you want to once combine all chunkNs and extract with all the newest-versioned-files.
 ﻿﻿4.Check the checkbox of the files you want.
@@ -56,7 +56,7 @@ v1.1 更新增加了进度条
 
 使用方法：
 0.软件基于.net framework 4.7.2框架制作，如果无法运行，则需先从 https://dotnet.microsoft.com/download/dotnet-framework-runtime 下载并安装运行环境。
-1.*如提示未找到oo2core_8_win64.dll，请从其他地方拷贝该文件至本程序文件夹
+1.*如提示未找到oo2core_8_win64.dll，请从其他地方(如Warframe)拷贝该文件至本程序文件夹
 ﻿﻿2.双击"MHWNoChunk.exe"来启动程序
 ﻿﻿3.将需要解包的chunk*.bin拖入软件所示白色区域即可读取chunk内容。如果想要联合解包，则需要在拖拽前先勾选“联合解析全部chunk”
 ﻿﻿4.单击希望解包的文件前的选择框即可选中该文件/文件夹，选中文件夹的子文件将全部被选中
