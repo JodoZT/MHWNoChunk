@@ -67,9 +67,6 @@ namespace MHWNoChunk
                 ChunkOffsetDict.Add(i, ChunkOffset);
                 DictCount = i + 1;
             }
-            //For analyze
-            //StringBuilder sb = new StringBuilder();
-            //sb.Append("FileAddress, FromChunkBin, OffsetInChunkBin, ChunkIndex, OffsetInSingleChunk, FileSize(B)\n");
 
             cur_index = 0;
             long cur_offset = ChunkOffsetDict[cur_index];
@@ -148,8 +145,6 @@ namespace MHWNoChunk
                         child_node.ChunkPointer = (int)(FileOffset % 0x40000);
                     }
                     child_node.EntireName = StringNameChild;
-                    //For analyze
-                    //if(isFile)sb.Append($"{child_node.EntireName},{fileinputInfo.Name},{child_node.Offset},{child_node.ChunkIndex},{child_node.ChunkPointer},{child_node.Size}\n");
                     FileNode target_node = root_node;
                     foreach (string node_name in fathernodes)
                     {
@@ -187,15 +182,12 @@ namespace MHWNoChunk
             {
                 filelist[0].getSize();
             }
-            //For Analyze
-            //File.WriteAllText($"ChunkInfo-{fileinputInfo.Name}.csv", sb.ToString());
             return filelist;
         }
 
         //Extact function
         public int ExtractSelected(List<FileNode> itemlist, string BaseLocation, MainWindow mainWindow)
         {
-            if (!MainWindow.EnableCache) ChunkCache.Clear();
             int failed = 0;
             foreach (FileNode node in itemlist)
             {
@@ -219,7 +211,7 @@ namespace MHWNoChunk
                         {
                             if (CurNodeChunk.ChunkCache.Count > 20) CurNodeChunk.ChunkCache.Clear();
                             CurNodeChunk.ChunkDecompressed = CurNodeChunk.getDecompressedChunk(CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index], CurNodeChunk.MetaChunk[CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index]], CurNodeChunk.Reader, CurNodeChunk.cur_index);
-                            if (MainWindow.EnableCache)CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index, CurNodeChunk.ChunkDecompressed);
+                            CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index, CurNodeChunk.ChunkDecompressed);
                         }
                         if (CurNodeChunk.ChunkCache.ContainsKey(CurNodeChunk.cur_index + 1))
                         {
@@ -230,13 +222,13 @@ namespace MHWNoChunk
                             if (CurNodeChunk.ChunkCache.Count > 20) CurNodeChunk.ChunkCache.Clear();
                             if (CurNodeChunk.cur_index + 1 < CurNodeChunk.DictCount) { CurNodeChunk.NextChunkDecompressed = CurNodeChunk.getDecompressedChunk(CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index + 1], CurNodeChunk.MetaChunk[CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index + 1]], CurNodeChunk.Reader, CurNodeChunk.cur_index + 1); }
                             else { CurNodeChunk.NextChunkDecompressed = new byte[0]; }
-                            if(MainWindow.EnableCache)CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index + 1, CurNodeChunk.NextChunkDecompressed);
+                            CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index + 1, CurNodeChunk.NextChunkDecompressed);
                         }
                         if (!node.IsFile) new FileInfo(BaseLocation + node.EntireName + "\\").Directory.Create();
                         else new FileInfo(BaseLocation + node.EntireName).Directory.Create();
                         if (node.IsFile)
                         {
-                            bool needExtract = !(MainWindow.correctOnly && !node.IsCorrect);
+                            bool needExtract = true;
                             if (MainWindow.filterEnabled) {
                                 if (MainWindow.regexEnabled)
                                 {
@@ -248,34 +240,7 @@ namespace MHWNoChunk
                             }
                             if (needExtract)
                             {
-                                if (!MainWindow.splitByChunk || node.CrossChunkCnt == 1) File.WriteAllBytes(BaseLocation + node.EntireName, CurNodeChunk.getOnLength(size, new byte[size], 0));
-                                else
-                                {
-                                    byte[] curFileContent = CurNodeChunk.getOnLength(size, new byte[size], 0);
-                                    string curFileLocation = BaseLocation + node.EntireName;
-                                    int _cursor = 0;
-                                    int pieceCnt = 0;
-                                    for (int i = 0; i < node.CrossChunkCnt; i++)
-                                    {
-                                        if (i == 0)
-                                        {
-                                            File.WriteAllBytes(BaseLocation + node.EntireName + ".piece" + pieceCnt.ToString(), curFileContent.Skip<byte>(_cursor).Take<byte>(0x40000 - node.ChunkPointer).ToArray<byte>());
-                                            _cursor += 0x40000 - node.ChunkPointer;
-                                            pieceCnt++;
-                                        }
-                                        else if (i == node.CrossChunkCnt - 1)
-                                        {
-                                            File.WriteAllBytes(BaseLocation + node.EntireName + ".piece" + pieceCnt.ToString(), curFileContent.Skip<byte>(_cursor).Take<byte>(0x40000).ToArray<byte>());
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            File.WriteAllBytes(BaseLocation + node.EntireName + ".piece" + pieceCnt.ToString(), curFileContent.Skip<byte>(_cursor).Take<byte>(0x40000).ToArray<byte>());
-                                            _cursor += 0x40000;
-                                            pieceCnt++;
-                                        }
-                                    }
-                                }
+                                File.WriteAllBytes(BaseLocation + node.EntireName, CurNodeChunk.getOnLength(size, new byte[size], 0));
                             }
                             mainWindow.updateExtractProgress();
                         }
@@ -357,26 +322,21 @@ namespace MHWNoChunk
             }
             return tmp;
         }
-
-        //public static Dictionary<int, int> keyMapDict = new Dictionary<int, int>() {
-        //    {0, 11},{1, 4},{2, 8},{3, 13},{4, 0},{5, 3},{6, 7},{7,15},{8,14},{9,10},{10,1},{11,12},{12,5},{13,9},{14,6},{15,2},{0xFF,0xFF},{0xFD,0xFD}
-        //};
+        
         public static Dictionary<int, int> chunkKeyPattern = new Dictionary<int, int>();
         // Get right chunk encryption key for iteration. Copy from WorldChunkTool.
         public static byte[] GetChunkKey(int i)
         {
             if (chunkKeyPattern.Count == 0) {
-                DirectoryInfo KeyDir = new DirectoryInfo("./keys");
-                foreach (FileInfo keyFileInfo in KeyDir.GetFiles("*.key")) {
-                    BinaryReader keyReader = new BinaryReader(File.Open(keyFileInfo.FullName, FileMode.Open, FileAccess.Read));
-                    int keystart = keyReader.ReadInt32();
-                    int keyend = keyReader.ReadInt32();
-                    for (int keyitrator = keystart; keyitrator <= keyend; keyitrator++) {
-                        int curKey = keyReader.ReadByte();
-                        chunkKeyPattern.Add(keyitrator - 1, curKey);
-                    }
-                    keyReader.Close();
+                FileInfo keyFileInfo = new FileInfo("chunk.key");
+                BinaryReader keyReader = new BinaryReader(File.Open(keyFileInfo.FullName, FileMode.Open, FileAccess.Read));
+                int keystart = keyReader.ReadInt32();
+                int keyend = keyReader.ReadInt32();
+                for (int keyitrator = keystart; keyitrator <= keyend; keyitrator++) {
+                    int curKey = keyReader.ReadByte();
+                    chunkKeyPattern.Add(keyitrator - 1, curKey);
                 }
+                keyReader.Close();
             }
 
             List<byte[]> chunkKeys = new List<byte[]>
@@ -414,9 +374,6 @@ namespace MHWNoChunk
                 //15 41d055b3dd6015167e8f598ce23f1929
                 new byte[] { 0x41, 0xd0, 0x55, 0xb3, 0xdd, 0x60, 0x15, 0x16, 0x7e, 0x8f, 0x59, 0x8c, 0xe2, 0x3f, 0x19, 0x29 },
             };
-            if (MainWindow.forceKey != -1) {
-                return chunkKeys[MainWindow.forceKey];
-            }
             int keyPos = chunkKeyPattern[i];
             if (keyPos > 0xF) keyPos = 0;
             byte[] chunkKey = chunkKeys[keyPos];

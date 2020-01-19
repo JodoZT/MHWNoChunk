@@ -23,11 +23,7 @@ namespace MHWNoChunk
     public partial class MainWindow : Window
     {
         public static bool CNMode = false;
-        public static bool DebugMode = true;
-        public static bool EnableCache = true;
-        public static bool splitByChunk = false;
         public static bool regexEnabled = false;
-        public static bool correctOnly = false;
         public static string filterText = "";
         public static bool filterEnabled = false;
         public static Regex filterRegex = null;
@@ -42,37 +38,10 @@ namespace MHWNoChunk
         Chunk mainChunk;
         bool CombineChecked = false;
         Dictionary<string, Chunk> chunkMap = new Dictionary<string, Chunk>();
-
-        public static Dictionary<int, string> recommandDict = new Dictionary<int, string>() {
-            { -1, "-1"},
-            { 0, "14,5,15"},
-            { 1, "4,11,3"},
-            { 2, "6,14,5"},
-            { 3, "13,6,14"},
-            { 4, "0,7,13"},
-            { 5, "9,12,10"},
-            { 6, "8,1,9"},
-            { 7, "5,15,8"},
-            { 8, "10,4,11"},
-            { 9, "11,3,2"},
-            { 10, "2,0,7"},
-            { 11, "7,13,6"},
-            { 12, "3,2,0"},
-            { 13, "15,8,1"},
-            { 14, "1,9,12"},
-            { 15, "12,10,4"},
-        };
-        public static int forceKey = -1;
+        
         public MainWindow()
         {
             InitializeComponent();
-            ForceKey.ItemsSource = new List<int>() {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,-1};
-            ForceKey.SelectedIndex = 16;
-            if (!DebugMode) {
-                ForceKey.Visibility = Visibility.Hidden;
-                ForceKeyLabel.Visibility = Visibility.Hidden;
-                RecommandLabel.Visibility = Visibility.Hidden;
-            }
             analyzeworker = new BackgroundWorker();
             analyzeworker.WorkerSupportsCancellation = true;
             analyzeworker.DoWork += new DoWorkEventHandler(DoAnalyzeHandler);
@@ -85,13 +54,12 @@ namespace MHWNoChunk
         private void initChinese() {
             if (CNMode)
             {
-                this.Title = "MHW部分解包器 v2.0.0 By Jodo @ 狩技MOD组";
+                this.Title = "MHW部分解包器 v2.1.0 By Jodo @ 狩技MOD组";
                 LogBox.Text = "拖拽chunkN.bin至上方空白区域以开始。如果想要一次性解析全部chunk0-chunkN.bin，请先勾选右侧的联合解析全部Chunk。本程序根据 WorldChunkTool by MHVuze的原理制作: https://github.com/mhvuze/WorldChunkTool";
                 CombineCheckBox.Content = "联合解析全部Chunk";
                 ExtractBtn.Content = "提取所选文件";
                 FilterLabel.Content = "筛选:";
                 RegExCheckBox.Content = "正则表达式";
-                CorrectOnlyCheckBox.Content = "仅正确文件";
             }
         }
 
@@ -130,7 +98,6 @@ namespace MHWNoChunk
                 {
                     ExtractBtn.IsEnabled = true;
                     RegExCheckBox.IsEnabled = true;
-                    CorrectOnlyCheckBox.IsEnabled = true;
                     FilterBox.IsEnabled = true;
                 }));
                 return;
@@ -162,7 +129,6 @@ namespace MHWNoChunk
             {
                 ExtractBtn.IsEnabled = true;
                 RegExCheckBox.IsEnabled = true;
-                CorrectOnlyCheckBox.IsEnabled = true;
                 FilterBox.IsEnabled = true;
             }));
             if (!CNMode) printlog("Finished!");
@@ -301,7 +267,6 @@ namespace MHWNoChunk
             }
             ExtractBtn.IsEnabled = false;
             RegExCheckBox.IsEnabled = false;
-            CorrectOnlyCheckBox.IsEnabled = false;
             FilterBox.IsEnabled = false;
             extractworker.RunWorkerAsync();
         }
@@ -316,34 +281,9 @@ namespace MHWNoChunk
             CombineChecked = false;
         }
 
-        private void ForceKey_Selected(object sender, RoutedEventArgs e)
-        {
-            forceKey = (int)ForceKey.SelectedValue;
-            RecommandLabel.Content = $"RecommandNext:{recommandDict[forceKey]}";
-            if (forceKey != -1)
-            {
-                EnableCache = false;
-                printlog("Cache disabled.");
-            }
-            else {
-                EnableCache = true;
-                printlog("Cache enabled.");
-            }
-        }
-
-        private void SplitCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            splitByChunk = (bool)SplitCheckBox.IsChecked;
-        }
-
         private void RegExCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             regexEnabled = (bool)RegExCheckBox.IsChecked;
-        }
-
-        private void CorrectOnlyCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            correctOnly = (bool)CorrectOnlyCheckBox.IsChecked;
         }
 
         private void FilterBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
