@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MHWNoChunk
 {
@@ -17,6 +19,7 @@ namespace MHWNoChunk
         string fileinput;
         Dictionary<int, byte[]> ChunkCache;
 
+
         // Learns from WorldChunkTool by MHVuze https://github.com/mhvuze/WorldChunkTool
         public List<FileNode> AnalyzeChunk(String FileInput, MainWindow mainwindow, List<FileNode> inputFileList)
         {
@@ -30,7 +33,7 @@ namespace MHWNoChunk
             MetaChunk = new Dictionary<long, long>();
             ChunkOffsetDict = new Dictionary<int, long>();
             string NamePKG = $"{Environment.CurrentDirectory}\\{Path.GetFileNameWithoutExtension(FileInput)}.pkg";
-            Reader = new BinaryReader(File.Open(FileInput, FileMode.Open));
+            Reader = new BinaryReader(File.Open(FileInput, FileMode.Open, FileAccess.Read));
 
             // Read header
             Reader.BaseStream.Seek(4, SeekOrigin.Begin);
@@ -64,11 +67,13 @@ namespace MHWNoChunk
                 ChunkOffsetDict.Add(i, ChunkOffset);
                 DictCount = i + 1;
             }
+            //For analyze
+            //StringBuilder sb = new StringBuilder();
+            //sb.Append("FileAddress, FromChunkBin, OffsetInChunkBin, ChunkIndex, OffsetInSingleChunk, FileSize(B)\n");
 
             cur_index = 0;
             long cur_offset = ChunkOffsetDict[cur_index];
             long cur_size = MetaChunk[cur_offset];
-
             ChunkDecompressed = getDecompressedChunk(cur_offset, cur_size, Reader, cur_index);
             if (cur_index + 1 < DictCount)
             {
@@ -143,6 +148,8 @@ namespace MHWNoChunk
                         child_node.ChunkPointer = (int)(FileOffset % 0x40000);
                     }
                     child_node.EntireName = StringNameChild;
+                    //For analyze
+                    //if(isFile)sb.Append($"{child_node.EntireName},{fileinputInfo.Name},{child_node.Offset},{child_node.ChunkIndex},{child_node.ChunkPointer},{child_node.Size}\n");
                     FileNode target_node = root_node;
                     foreach (string node_name in fathernodes)
                     {
@@ -180,12 +187,15 @@ namespace MHWNoChunk
             {
                 filelist[0].getSize();
             }
+            //For Analyze
+            //File.WriteAllText($"ChunkInfo-{fileinputInfo.Name}.csv", sb.ToString());
             return filelist;
         }
 
         //Extact function
         public int ExtractSelected(List<FileNode> itemlist, string BaseLocation, MainWindow mainWindow)
         {
+            if (!MainWindow.EnableCache) ChunkCache.Clear();
             int failed = 0;
             foreach (FileNode node in itemlist)
             {
@@ -209,7 +219,7 @@ namespace MHWNoChunk
                         {
                             if (CurNodeChunk.ChunkCache.Count > 20) CurNodeChunk.ChunkCache.Clear();
                             CurNodeChunk.ChunkDecompressed = CurNodeChunk.getDecompressedChunk(CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index], CurNodeChunk.MetaChunk[CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index]], CurNodeChunk.Reader, CurNodeChunk.cur_index);
-                            CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index, CurNodeChunk.ChunkDecompressed);
+                            if (MainWindow.EnableCache)CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index, CurNodeChunk.ChunkDecompressed);
                         }
                         if (CurNodeChunk.ChunkCache.ContainsKey(CurNodeChunk.cur_index + 1))
                         {
@@ -220,13 +230,53 @@ namespace MHWNoChunk
                             if (CurNodeChunk.ChunkCache.Count > 20) CurNodeChunk.ChunkCache.Clear();
                             if (CurNodeChunk.cur_index + 1 < CurNodeChunk.DictCount) { CurNodeChunk.NextChunkDecompressed = CurNodeChunk.getDecompressedChunk(CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index + 1], CurNodeChunk.MetaChunk[CurNodeChunk.ChunkOffsetDict[CurNodeChunk.cur_index + 1]], CurNodeChunk.Reader, CurNodeChunk.cur_index + 1); }
                             else { CurNodeChunk.NextChunkDecompressed = new byte[0]; }
-                            CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index + 1, CurNodeChunk.NextChunkDecompressed);
+                            if(MainWindow.EnableCache)CurNodeChunk.ChunkCache.Add(CurNodeChunk.cur_index + 1, CurNodeChunk.NextChunkDecompressed);
                         }
                         if (!node.IsFile) new FileInfo(BaseLocation + node.EntireName + "\\").Directory.Create();
                         else new FileInfo(BaseLocation + node.EntireName).Directory.Create();
                         if (node.IsFile)
                         {
-                            File.WriteAllBytes(BaseLocation + node.EntireName, CurNodeChunk.getOnLength(size, new byte[size], 0));
+                            bool needExtract = !(MainWindow.correctOnly && !node.IsCorrect);
+                            if (MainWindow.filterEnabled) {
+                                if (MainWindow.regexEnabled)
+                                {
+                                    needExtract = needExtract && MainWindow.filterRegex.IsMatch(node.EntireName);
+                                }
+                                else {
+                                    needExtract = needExtract && node.EntireName.Contains(MainWindow.filterText);
+                                }
+                            }
+                            if (needExtract)
+                            {
+                                if (!MainWindow.splitByChunk || node.CrossChunkCnt == 1) File.WriteAllBytes(BaseLocation + node.EntireName, CurNodeChunk.getOnLength(size, new byte[size], 0));
+                                else
+                                {
+                                    byte[] curFileContent = CurNodeChunk.getOnLength(size, new byte[size], 0);
+                                    string curFileLocation = BaseLocation + node.EntireName;
+                                    int _cursor = 0;
+                                    int pieceCnt = 0;
+                                    for (int i = 0; i < node.CrossChunkCnt; i++)
+                                    {
+                                        if (i == 0)
+                                        {
+                                            File.WriteAllBytes(BaseLocation + node.EntireName + ".piece" + pieceCnt.ToString(), curFileContent.Skip<byte>(_cursor).Take<byte>(0x40000 - node.ChunkPointer).ToArray<byte>());
+                                            _cursor += 0x40000 - node.ChunkPointer;
+                                            pieceCnt++;
+                                        }
+                                        else if (i == node.CrossChunkCnt - 1)
+                                        {
+                                            File.WriteAllBytes(BaseLocation + node.EntireName + ".piece" + pieceCnt.ToString(), curFileContent.Skip<byte>(_cursor).Take<byte>(0x40000).ToArray<byte>());
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            File.WriteAllBytes(BaseLocation + node.EntireName + ".piece" + pieceCnt.ToString(), curFileContent.Skip<byte>(_cursor).Take<byte>(0x40000).ToArray<byte>());
+                                            _cursor += 0x40000;
+                                            pieceCnt++;
+                                        }
+                                    }
+                                }
+                            }
                             mainWindow.updateExtractProgress();
                         }
                     }
@@ -245,8 +295,7 @@ namespace MHWNoChunk
         //To get decompressed chunk
         private byte[] getDecompressedChunk(long offset, long size, BinaryReader reader, int chunkNum)
         {
-
-            if (size != 0)
+            try {if (size != 0)
             {
                 reader.BaseStream.Seek(offset, SeekOrigin.Begin);
                 byte[] ChunkCompressed = reader.ReadBytes((int)size); // Unsafe cast
@@ -255,8 +304,14 @@ namespace MHWNoChunk
             else
             {
                 reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-                return reader.ReadBytes(0x40000);
+                return DecryptChunk(reader.ReadBytes(0x40000), GetChunkKey(chunkNum));
+            } }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.StackTrace);
+                return null;
             }
+
         }
 
         //To read an ASCII string from chunk bytes
@@ -303,59 +358,70 @@ namespace MHWNoChunk
             return tmp;
         }
 
+        //public static Dictionary<int, int> keyMapDict = new Dictionary<int, int>() {
+        //    {0, 11},{1, 4},{2, 8},{3, 13},{4, 0},{5, 3},{6, 7},{7,15},{8,14},{9,10},{10,1},{11,12},{12,5},{13,9},{14,6},{15,2},{0xFF,0xFF},{0xFD,0xFD}
+        //};
+        public static Dictionary<int, int> chunkKeyPattern = new Dictionary<int, int>();
         // Get right chunk encryption key for iteration. Copy from WorldChunkTool.
         public static byte[] GetChunkKey(int i)
         {
+            if (chunkKeyPattern.Count == 0) {
+                DirectoryInfo KeyDir = new DirectoryInfo("./keys");
+                foreach (FileInfo keyFileInfo in KeyDir.GetFiles("*.key")) {
+                    BinaryReader keyReader = new BinaryReader(File.Open(keyFileInfo.FullName, FileMode.Open, FileAccess.Read));
+                    int keystart = keyReader.ReadInt32();
+                    int keyend = keyReader.ReadInt32();
+                    for (int keyitrator = keystart; keyitrator <= keyend; keyitrator++) {
+                        int curKey = keyReader.ReadByte();
+                        chunkKeyPattern.Add(keyitrator - 1, curKey);
+                    }
+                    keyReader.Close();
+                }
+            }
+
             List<byte[]> chunkKeys = new List<byte[]>
             {
-                // 1f6d31c883dd716d7e8f598ce23f1929
-                new byte[] { 0x1f, 0x6d, 0x31, 0xc8, 0x83, 0xdd, 0x71, 0x6d, 0x7e, 0x8f, 0x59, 0x8c, 0xe2, 0x3f, 0x19, 0x29 },
-                // 25099c1f911a26e5ce9172f07a82c80a
-                new byte[] { 0x25, 0x09, 0x9c, 0x1f, 0x91, 0x1a, 0x26, 0xe5, 0xce, 0x91, 0x72, 0xf0, 0x7a, 0x82, 0xc8, 0x0a },
-                // 41d055b3dd6015167e8f598ce23f1929
-                new byte[] { 0x41, 0xd0, 0x55, 0xb3, 0xdd, 0x60, 0x15, 0x16, 0x7e, 0x8f, 0x59, 0x8c, 0xe2, 0x3f, 0x19, 0x29 },
-                // 4bb0de04e4e0856980ccb2942f9ce9f9
-                new byte[] { 0x4b, 0xb0, 0xde, 0x04, 0xe4, 0xe0, 0x85, 0x69, 0x80, 0xcc, 0xb2, 0x94, 0x2f, 0x9c, 0xe9, 0xf9 },
-                // 6bb5c956e44d00bc305233cfbfaafa25
-                new byte[] { 0x6b, 0xb5, 0xc9, 0x56, 0xe4, 0x4d, 0x00, 0xbc, 0x30, 0x52, 0x33, 0xcf, 0xbf, 0xaa, 0xfa, 0x25 },
-                // 7eb268373b5d361ed6d313e2933c4dcb
-                new byte[] { 0x7e, 0xb2, 0x68, 0x37, 0x3b, 0x5d, 0x36, 0x1e, 0xd6, 0xd3, 0x13, 0xe2, 0x93, 0x3c, 0x4d, 0xcb },
-                // 82a43b2108797c6a440089a2ceddcee9
-                new byte[] { 0x82, 0xa4, 0x3b, 0x21, 0x08, 0x79, 0x7c, 0x6a, 0x44, 0x00, 0x89, 0xa2, 0xce, 0xdd, 0xce, 0xe9 },
-                // 8bce54dc4c11139a7875bd63bfaafa25
-                new byte[] { 0x8b, 0xce, 0x54, 0xdc, 0x4c, 0x11, 0x13, 0x9a, 0x78, 0x75, 0xbd, 0x63, 0xbf, 0xaa, 0xfa, 0x25 },
-                // 8f021dccb0f2787206fbdee2390bbb5c
-                new byte[] { 0x8f, 0x02, 0x1d, 0xcc, 0xb0, 0xf2, 0x78, 0x72, 0x06, 0xfb, 0xde, 0xe2, 0x39, 0x0b, 0xbb, 0x5c },
-                // a1c7d2ea661895ac7875bd63bfaafa25
-                new byte[] { 0xa1, 0xc7, 0xd2, 0xea, 0x66, 0x18, 0x95, 0xac, 0x78, 0x75, 0xbd, 0x63, 0xbf, 0xaa, 0xfa, 0x25 },
-                // a492fc9033949c15a033ac223735cca7
-                new byte[] { 0xa4, 0x92, 0xfc, 0x90, 0x33, 0x94, 0x9c, 0x15, 0xa0, 0x33, 0xac, 0x22, 0x37, 0x35, 0xcc, 0xa7 },
-                // ac76cb97ec7500133a81038e7a82c80a
+                //0 ac76cb97ec7500133a81038e7a82c80a
                 new byte[] { 0xac, 0x76, 0xcb, 0x97, 0xec, 0x75, 0x00, 0x13, 0x3a, 0x81, 0x03, 0x8e, 0x7a, 0x82, 0xc8, 0x0a },
-                // d1d29d7446d4fdf1a033ac223735cca7
-                new byte[] { 0xd1, 0xd2, 0x9d, 0x74, 0x46, 0xd4, 0xfd, 0xf1, 0xa0, 0x33, 0xac, 0x22, 0x37, 0x35, 0xcc, 0xa7 },
-                // da5c1e531d8359157875bd63bfaafa25
+                //1 6bb5c956e44d00bc305233cfbfaafa25
+                new byte[] { 0x6b, 0xb5, 0xc9, 0x56, 0xe4, 0x4d, 0x00, 0xbc, 0x30, 0x52, 0x33, 0xcf, 0xbf, 0xaa, 0xfa, 0x25 },
+                //2 8f021dccb0f2787206fbdee2390bbb5c
+                new byte[] { 0x8f, 0x02, 0x1d, 0xcc, 0xb0, 0xf2, 0x78, 0x72, 0x06, 0xfb, 0xde, 0xe2, 0x39, 0x0b, 0xbb, 0x5c },
+                //3 da5c1e531d8359157875bd63bfaafa25
                 new byte[] { 0xda, 0x5c, 0x1e, 0x53, 0x1d, 0x83, 0x59, 0x15, 0x78, 0x75, 0xbd, 0x63, 0xbf, 0xaa, 0xfa, 0x25 },
-                // e4662c709c753a039a2c0f5ae23f1929
-                new byte[] { 0xe4, 0x66, 0x2c, 0x70, 0x9c, 0x75, 0x3a, 0x03, 0x9a, 0x2c, 0x0f, 0x5a, 0xe2, 0x3f, 0x19, 0x29 },
-                // ec13345966ce7312440089a2ceddcee9
+                //4 1f6d31c883dd716d7e8f598ce23f1929
+                new byte[] { 0x1f, 0x6d, 0x31, 0xc8, 0x83, 0xdd, 0x71, 0x6d, 0x7e, 0x8f, 0x59, 0x8c, 0xe2, 0x3f, 0x19, 0x29 },
+                //5 4bb0de04e4e0856980ccb2942f9ce9f9
+                new byte[] { 0x4b, 0xb0, 0xde, 0x04, 0xe4, 0xe0, 0x85, 0x69, 0x80, 0xcc, 0xb2, 0x94, 0x2f, 0x9c, 0xe9, 0xf9 },
+                //6 8bce54dc4c11139a7875bd63bfaafa25
+                new byte[] { 0x8b, 0xce, 0x54, 0xdc, 0x4c, 0x11, 0x13, 0x9a, 0x78, 0x75, 0xbd, 0x63, 0xbf, 0xaa, 0xfa, 0x25 },
+                //7 ec13345966ce7312440089a2ceddcee9
                 new byte[] { 0xec, 0x13, 0x34, 0x59, 0x66, 0xce, 0x73, 0x12, 0x44, 0x00, 0x89, 0xa2, 0xce, 0xdd, 0xce, 0xe9 },
-                // 16/FF: DUMMYKEY - No key produced uint32 null space
-                new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
-                // 17/FE: DUMMYKEY - More than one key produced uint32 null space
-                new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
-                // 18/FD: DUMMYKEY - File not found
-                new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
-                // 19/FC: DUMMYKEY - Missing from all keyfiles
-                new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+                //8 e4662c709c753a039a2c0f5ae23f1929
+                new byte[] { 0xe4, 0x66, 0x2c, 0x70, 0x9c, 0x75, 0x3a, 0x03, 0x9a, 0x2c, 0x0f, 0x5a, 0xe2, 0x3f, 0x19, 0x29 },
+                //9 a492fc9033949c15a033ac223735cca7
+                new byte[] { 0xa4, 0x92, 0xfc, 0x90, 0x33, 0x94, 0x9c, 0x15, 0xa0, 0x33, 0xac, 0x22, 0x37, 0x35, 0xcc, 0xa7 },
+                //10 25099c1f911a26e5ce9172f07a82c80a
+                new byte[] { 0x25, 0x09, 0x9c, 0x1f, 0x91, 0x1a, 0x26, 0xe5, 0xce, 0x91, 0x72, 0xf0, 0x7a, 0x82, 0xc8, 0x0a },
+                //11 d1d29d7446d4fdf1a033ac223735cca7
+                new byte[] { 0xd1, 0xd2, 0x9d, 0x74, 0x46, 0xd4, 0xfd, 0xf1, 0xa0, 0x33, 0xac, 0x22, 0x37, 0x35, 0xcc, 0xa7 },
+                //12 7eb268373b5d361ed6d313e2933c4dcb
+                new byte[] { 0x7e, 0xb2, 0x68, 0x37, 0x3b, 0x5d, 0x36, 0x1e, 0xd6, 0xd3, 0x13, 0xe2, 0x93, 0x3c, 0x4d, 0xcb },
+                //13 a1c7d2ea661895ac7875bd63bfaafa25
+                new byte[] { 0xa1, 0xc7, 0xd2, 0xea, 0x66, 0x18, 0x95, 0xac, 0x78, 0x75, 0xbd, 0x63, 0xbf, 0xaa, 0xfa, 0x25 },
+                //14 82a43b2108797c6a440089a2ceddcee9
+                new byte[] { 0x82, 0xa4, 0x3b, 0x21, 0x08, 0x79, 0x7c, 0x6a, 0x44, 0x00, 0x89, 0xa2, 0xce, 0xdd, 0xce, 0xe9 },
+                //15 41d055b3dd6015167e8f598ce23f1929
+                new byte[] { 0x41, 0xd0, 0x55, 0xb3, 0xdd, 0x60, 0x15, 0x16, 0x7e, 0x8f, 0x59, 0x8c, 0xe2, 0x3f, 0x19, 0x29 },
             };
-
-
-            int keyPos = Utils.chunkKeyPattern[i];
+            if (MainWindow.forceKey != -1) {
+                return chunkKeys[MainWindow.forceKey];
+            }
+            int keyPos = chunkKeyPattern[i];
+            if (keyPos > 0xF) keyPos = 0;
             byte[] chunkKey = chunkKeys[keyPos];
             return chunkKey;
         }
-
 
         // Decrypt Iceborne PKG chunks. Copy from WorldChunkTool.
         public static byte[] DecryptChunk(byte[] data, byte[] chunkKey)

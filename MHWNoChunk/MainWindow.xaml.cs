@@ -23,6 +23,14 @@ namespace MHWNoChunk
     public partial class MainWindow : Window
     {
         public static bool CNMode = false;
+        public static bool DebugMode = true;
+        public static bool EnableCache = true;
+        public static bool splitByChunk = false;
+        public static bool regexEnabled = false;
+        public static bool correctOnly = false;
+        public static string filterText = "";
+        public static bool filterEnabled = false;
+        public static Regex filterRegex = null;
         private string chunkfilename;
         static int MagicChunk = 0x00504D43;
         int MagicInputFile;
@@ -35,9 +43,36 @@ namespace MHWNoChunk
         bool CombineChecked = false;
         Dictionary<string, Chunk> chunkMap = new Dictionary<string, Chunk>();
 
+        public static Dictionary<int, string> recommandDict = new Dictionary<int, string>() {
+            { -1, "-1"},
+            { 0, "14,5,15"},
+            { 1, "4,11,3"},
+            { 2, "6,14,5"},
+            { 3, "13,6,14"},
+            { 4, "0,7,13"},
+            { 5, "9,12,10"},
+            { 6, "8,1,9"},
+            { 7, "5,15,8"},
+            { 8, "10,4,11"},
+            { 9, "11,3,2"},
+            { 10, "2,0,7"},
+            { 11, "7,13,6"},
+            { 12, "3,2,0"},
+            { 13, "15,8,1"},
+            { 14, "1,9,12"},
+            { 15, "12,10,4"},
+        };
+        public static int forceKey = -1;
         public MainWindow()
         {
             InitializeComponent();
+            ForceKey.ItemsSource = new List<int>() {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,-1};
+            ForceKey.SelectedIndex = 16;
+            if (!DebugMode) {
+                ForceKey.Visibility = Visibility.Hidden;
+                ForceKeyLabel.Visibility = Visibility.Hidden;
+                RecommandLabel.Visibility = Visibility.Hidden;
+            }
             analyzeworker = new BackgroundWorker();
             analyzeworker.WorkerSupportsCancellation = true;
             analyzeworker.DoWork += new DoWorkEventHandler(DoAnalyzeHandler);
@@ -54,6 +89,9 @@ namespace MHWNoChunk
                 LogBox.Text = "拖拽chunkN.bin至上方空白区域以开始。如果想要一次性解析全部chunk0-chunkN.bin，请先勾选右侧的联合解析全部Chunk。本程序根据 WorldChunkTool by MHVuze的原理制作: https://github.com/mhvuze/WorldChunkTool";
                 CombineCheckBox.Content = "联合解析全部Chunk";
                 ExtractBtn.Content = "提取所选文件";
+                FilterLabel.Content = "筛选:";
+                RegExCheckBox.Content = "正则表达式";
+                CorrectOnlyCheckBox.Content = "仅正确文件";
             }
         }
 
@@ -82,27 +120,39 @@ namespace MHWNoChunk
                 FileNode rootnode = itemlist[0];
                 total_progress = rootnode.getSelectedCount();
                 setProgressbarMax(total_progress);
+                setProgressbar(0, total_progress);
             }
             if (total_progress == 0)
             {
-                printlog("Nothing selected.");
+                if (!CNMode) printlog("Nothing selected.");
+                else printlog("未选择任何文件");
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ExtractBtn.IsEnabled = true;
+                    RegExCheckBox.IsEnabled = true;
+                    CorrectOnlyCheckBox.IsEnabled = true;
+                    FilterBox.IsEnabled = true;
                 }));
                 return;
             }
             if (!CNMode)
             {
-                printlog("Export to: " + output_directory);
+                printlog("Export to: " + output_directory, true);
                 printlog("It may take a long time to extract all the files you selected which depends on the file size and amount you selected.");
             }
             else {
-                printlog("解包至: " + output_directory);
+                printlog("解包至: " + output_directory, true);
                 printlog("根据你所选取的文件数量和大小，这可能会花费很长时间，请耐心等待");
             }
             int failed = 0;
-            if(CombineChecked) chunkMap.FirstOrDefault().Value.ExtractSelected(itemlist, output_directory, this);
+            if (filterText != "")
+            {
+                filterEnabled = true;
+                if (regexEnabled) filterRegex = new Regex(filterText);
+                else filterRegex = null;
+            }
+            else filterEnabled = false;
+            if (CombineChecked) chunkMap.FirstOrDefault().Value.ExtractSelected(itemlist, output_directory, this);
             else failed = mainChunk.ExtractSelected(itemlist, output_directory, this);
             if (failed > 0) {
                 if (!CNMode) printlog($"{failed} files failed to extract in total.");
@@ -111,6 +161,9 @@ namespace MHWNoChunk
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 ExtractBtn.IsEnabled = true;
+                RegExCheckBox.IsEnabled = true;
+                CorrectOnlyCheckBox.IsEnabled = true;
+                FilterBox.IsEnabled = true;
             }));
             if (!CNMode) printlog("Finished!");
             else printlog("提取完成！");
@@ -136,16 +189,9 @@ namespace MHWNoChunk
                         else printlog("联合解析已开启，程序将整合所有chunkN.bin文件");
                     }
                     if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_8_win64.dll")) {
-                        if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_7_win64.dll"))
-                        {
-                            if (!CNMode) printlog("Error: oo2core_8_win64.dll not found. Download the file from elsewhere to the executable folder.");
-                            else printlog("错误：未找到oo2core_8_win64.dll，请从其他地方下载该文件至本程序文件夹");
-                            return;
-                        }
-                        else {
-                            File.Copy($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_7_win64.dll",$"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_8_win64.dll", true);
-                        }
-                        
+                        if (!CNMode) printlog("Error: oo2core_8_win64.dll not found. Download the file from elsewhere to the executable folder.");
+                        else printlog("错误：未找到oo2core_8_win64.dll，请从其他地方下载该文件至本程序文件夹");
+                        return;
                     }
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -254,6 +300,9 @@ namespace MHWNoChunk
                 }
             }
             ExtractBtn.IsEnabled = false;
+            RegExCheckBox.IsEnabled = false;
+            CorrectOnlyCheckBox.IsEnabled = false;
+            FilterBox.IsEnabled = false;
             extractworker.RunWorkerAsync();
         }
 
@@ -265,6 +314,41 @@ namespace MHWNoChunk
         private void CombineCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             CombineChecked = false;
+        }
+
+        private void ForceKey_Selected(object sender, RoutedEventArgs e)
+        {
+            forceKey = (int)ForceKey.SelectedValue;
+            RecommandLabel.Content = $"RecommandNext:{recommandDict[forceKey]}";
+            if (forceKey != -1)
+            {
+                EnableCache = false;
+                printlog("Cache disabled.");
+            }
+            else {
+                EnableCache = true;
+                printlog("Cache enabled.");
+            }
+        }
+
+        private void SplitCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            splitByChunk = (bool)SplitCheckBox.IsChecked;
+        }
+
+        private void RegExCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            regexEnabled = (bool)RegExCheckBox.IsChecked;
+        }
+
+        private void CorrectOnlyCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            correctOnly = (bool)CorrectOnlyCheckBox.IsChecked;
+        }
+
+        private void FilterBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            filterText = FilterBox.Text;
         }
 
         public Chunk getChunk(string chunkfile) {
