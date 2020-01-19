@@ -30,7 +30,7 @@ For help with bruteforcing the Iceborne chunk key order early on: Vuze, XunLi, A
 
 * v2.1.0:
 
-    Update keys for IceBorne
+    Update keys for IceBorne. Enable filter to file name.
 * v2.0.0:
 
     Supports iceborne version and never supports the older versions. If you are using the old version, please use the tool of v1.3.2.
