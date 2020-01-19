@@ -9,9 +9,13 @@ Nexusmods link to WorldChunkTool :https://www.nexusmods.com/monsterhunterworld/m
 Github link to WorldChunkTool: https://github.com/mhvuze/WorldChunkTool
 
 Credits:
+
 For help with the tool itself: Vuze, Asterisk, Stracker
+
 For providing the final Iceborne chunk key order: legendff
+
 For working on a keygen regarding Iceborne chunk encryption: MoonBunnie, Asterisk
+
 For help with bruteforcing the Iceborne chunk key order early on: Vuze, XunLi, Asterisk, Dallagen, MoonBunnie, Kiranico, DMQW, Aradi147, Ice, Miralis﻿
 
 ## What this tool can do:
