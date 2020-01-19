@@ -8,6 +8,12 @@ Nexusmods link to WorldChunkTool :https://www.nexusmods.com/monsterhunterworld/m
 
 Github link to WorldChunkTool: https://github.com/mhvuze/WorldChunkTool
 
+Credits:
+For help with the tool itself: Vuze, Asterisk, Stracker
+For providing the final Iceborne chunk key order: legendff
+For working on a keygen regarding Iceborne chunk encryption: MoonBunnie, Asterisk
+For help with bruteforcing the Iceborne chunk key order early on: Vuze, XunLi, Asterisk, Dallagen, MoonBunnie, Kiranico, DMQW, Aradi147, Ice, Miralis﻿
+
 ## What this tool can do:
 * Decompress part of the MHW chunk file as you want. 
 * 2x speed and 0.5x disk usage.
@@ -18,6 +24,9 @@ Github link to WorldChunkTool: https://github.com/mhvuze/WorldChunkTool
 
 ## Updates:
 
+* v2.1.0:
+
+    Update keys for IceBorne
 * v2.0.0:
 
     Supports iceborne version and never supports the older versions. If you are using the old version, please use the tool of v1.3.2.
