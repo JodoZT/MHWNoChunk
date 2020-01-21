@@ -151,7 +151,7 @@ namespace MHWNoChunk
                     if (!CNMode) printlog("Chunk detected，now analyzing...", true);
                     else printlog("检测到chunk文件，正在解析...", true);
                     if (CombineChecked) {
-                        if (!CNMode) printlog("Combine mode on. The program will combine all the chunk files.");
+                        if (!CNMode) printlog("Merge mode on. The program will merge all the chunk files.");
                         else printlog("联合解析已开启，程序将整合所有chunkN.bin文件");
                     }
                     if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_8_win64.dll")) {
