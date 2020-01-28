@@ -22,6 +22,7 @@ namespace MHWNoChunk
 {
     public partial class MainWindow : Window
     {
+        public static Stack<string> errors = new Stack<string>();
         public static bool CNMode = false;
         public static bool regexEnabled = false;
         public static string filterText = "";
@@ -49,6 +50,9 @@ namespace MHWNoChunk
             extractworker.WorkerSupportsCancellation = true;
             extractworker.DoWork += new DoWorkEventHandler(DoExtractHandler);
             initChinese();
+            checkFilesExist();
+            printlog("");
+            printErrorInfo();
         }
 
         private void initChinese() {
@@ -60,6 +64,23 @@ namespace MHWNoChunk
                 ExtractBtn.Content = "提取所选文件";
                 FilterLabel.Content = "筛选:";
                 RegExCheckBox.Content = "正则表达式";
+            }
+        }
+
+        public void checkFilesExist() {
+            string[] filesRequired = { "file.png", "dir.png", "chunk.key", "oo2core_8_win64.dll"};
+            foreach (string fileRequired in filesRequired) {
+                if (!File.Exists(fileRequired)) { if(!CNMode)errors.Push($"Error: {fileRequired} not found in the executable folder.");
+                else errors.Push($"错误：{fileRequired}未找到");
+                }
+            }
+        }
+
+        public void printErrorInfo()
+        {
+            while (errors.Count > 0)
+            {
+                printlog(errors.Pop(),false,false);
             }
         }
 
@@ -179,7 +200,7 @@ namespace MHWNoChunk
                         mainChunk = new Chunk();
                         itemlist = mainChunk.AnalyzeChunk(filename, this, itemlist);
                     }
-                    if (!CNMode) printlog("Analyze finished.");
+                    if (!CNMode) printlog("Analyzation finished.");
                     else printlog("解析完成");
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -200,8 +221,11 @@ namespace MHWNoChunk
         }
 
         // Print log to window
-        public void printlog(string log, bool clear = false)
+        public void printlog(string log, bool clear = false, bool checkError = true)
         {
+            if (checkError) {
+                printErrorInfo();
+            }
             if (!clear) Dispatcher.BeginInvoke(new Action(() =>
             {
                 LogBox.Text += (log + "\n");

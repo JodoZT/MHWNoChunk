@@ -18,11 +18,13 @@ namespace MHWNoChunk
         int DictCount = 0;
         string fileinput;
         Dictionary<int, byte[]> ChunkCache;
+        MainWindow bindingWindow = null;
 
 
         // Learns from WorldChunkTool by MHVuze https://github.com/mhvuze/WorldChunkTool
         public List<FileNode> AnalyzeChunk(String FileInput, MainWindow mainwindow, List<FileNode> inputFileList)
         {
+            bindingWindow = mainwindow;
             fileinput = FileInput;
             FileInfo fileinputInfo = new FileInfo(fileinput);
             if(!MainWindow.CNMode)mainwindow.printlog($"Now analyzing {fileinputInfo.Name}");
@@ -274,9 +276,9 @@ namespace MHWNoChunk
             catch (Exception ex)
             {
                 Console.WriteLine(ex.StackTrace);
+                bindingWindow.printlog(ex.Message);
                 return null;
             }
-
         }
 
         //To read an ASCII string from chunk bytes
@@ -328,15 +330,28 @@ namespace MHWNoChunk
         public static byte[] GetChunkKey(int i)
         {
             if (chunkKeyPattern.Count == 0) {
-                FileInfo keyFileInfo = new FileInfo("chunk.key");
-                BinaryReader keyReader = new BinaryReader(File.Open(keyFileInfo.FullName, FileMode.Open, FileAccess.Read));
-                int keystart = keyReader.ReadInt32();
-                int keyend = keyReader.ReadInt32();
-                for (int keyitrator = keystart; keyitrator <= keyend; keyitrator++) {
-                    int curKey = keyReader.ReadByte();
-                    chunkKeyPattern.Add(keyitrator - 1, curKey);
+                if (!File.Exists("chunk.key")) {
+                    if (!MainWindow.CNMode) MainWindow.errors.Push("Error: chunk.key not found in the executable folder.");
+                    else MainWindow.errors.Push("错误：chunk.key未找到");
+                    return new byte[] { };
                 }
-                keyReader.Close();
+                FileInfo keyFileInfo = new FileInfo("chunk.key");
+                try
+                {
+                    BinaryReader keyReader = new BinaryReader(File.Open(keyFileInfo.FullName, FileMode.Open, FileAccess.Read));
+                    int keystart = keyReader.ReadInt32();
+                    int keyend = keyReader.ReadInt32();
+                    for (int keyitrator = keystart; keyitrator <= keyend; keyitrator++)
+                    {
+                        int curKey = keyReader.ReadByte();
+                        chunkKeyPattern.Add(keyitrator - 1, curKey);
+                    }
+                    keyReader.Close();
+                }
+                catch (Exception ex) {
+                    MainWindow.errors.Push(ex.Message);
+                }
+                
             }
 
             List<byte[]> chunkKeys = new List<byte[]>
