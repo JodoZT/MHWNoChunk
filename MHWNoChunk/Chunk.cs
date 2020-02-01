@@ -35,7 +35,7 @@ namespace MHWNoChunk
             MetaChunk = new Dictionary<long, long>();
             ChunkOffsetDict = new Dictionary<int, long>();
             string NamePKG = $"{Environment.CurrentDirectory}\\{Path.GetFileNameWithoutExtension(FileInput)}.pkg";
-            Reader = new BinaryReader(File.Open(FileInput, FileMode.Open, FileAccess.Read));
+            Reader = new BinaryReader(File.OpenRead(FileInput));
 
             // Read header
             Reader.BaseStream.Seek(4, SeekOrigin.Begin);
@@ -338,7 +338,7 @@ namespace MHWNoChunk
                 FileInfo keyFileInfo = new FileInfo("chunk.key");
                 try
                 {
-                    BinaryReader keyReader = new BinaryReader(File.Open(keyFileInfo.FullName, FileMode.Open, FileAccess.Read));
+                    BinaryReader keyReader = new BinaryReader(File.OpenRead(keyFileInfo.FullName));
                     int keystart = keyReader.ReadInt32();
                     int keyend = keyReader.ReadInt32();
                     for (int keyitrator = keystart; keyitrator <= keyend; keyitrator++)
