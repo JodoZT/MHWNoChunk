@@ -351,7 +351,6 @@ namespace MHWNoChunk
                 catch (Exception ex) {
                     MainWindow.errors.Push(ex.Message);
                 }
-                
             }
 
             List<byte[]> chunkKeys = new List<byte[]>
