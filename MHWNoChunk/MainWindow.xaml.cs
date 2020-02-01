@@ -166,7 +166,7 @@ namespace MHWNoChunk
 
             try
             {
-                using (BinaryReader Reader = new BinaryReader(File.Open(filename, FileMode.Open))) MagicInputFile = Reader.ReadInt32();
+                using (BinaryReader Reader = new BinaryReader(File.OpenRead(filename))) MagicInputFile = Reader.ReadInt32();
                 if (MagicInputFile == MagicChunk)
                 {
                     if (!CNMode) printlog("Chunk detected，now analyzing...", true);
