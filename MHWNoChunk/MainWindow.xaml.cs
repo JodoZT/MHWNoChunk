@@ -17,6 +17,9 @@ using System.Windows.Shapes;
 using Microsoft.Win32;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Security.Cryptography;
 
 namespace MHWNoChunk
 {
@@ -39,10 +42,14 @@ namespace MHWNoChunk
         Chunk mainChunk;
         bool CombineChecked = false;
         Dictionary<string, Chunk> chunkMap = new Dictionary<string, Chunk>();
-        
+        TexPreviewer texPreviewer = new TexPreviewer();
+        MemoryStream texStream = new MemoryStream();
+        static string oo2coreMd5 = "9b7f9e3e4931b80257da5e1b626db43a";
+
         public MainWindow()
         {
             InitializeComponent();
+            PreviewUnsupportedInfoLabel.Visibility = Visibility.Hidden;
             analyzeworker = new BackgroundWorker();
             analyzeworker.WorkerSupportsCancellation = true;
             analyzeworker.DoWork += new DoWorkEventHandler(DoAnalyzeHandler);
@@ -50,28 +57,54 @@ namespace MHWNoChunk
             extractworker.WorkerSupportsCancellation = true;
             extractworker.DoWork += new DoWorkEventHandler(DoExtractHandler);
             initChinese();
-            checkFilesExist();
             printlog("");
+            checkFilesExist();
+            checkDllVersion();
             printErrorInfo();
         }
 
         private void initChinese() {
             if (CNMode)
             {
-                this.Title = "MHW部分解包器 v2.1.1 By Jodo @ 狩技MOD组";
+                this.Title = "MHW部分解包器 v2.2.0 By Jodo @ 狩技MOD组";
                 LogBox.Text = "拖拽chunkN.bin至上方空白区域以开始。如果想要一次性解析全部chunk0-chunkN.bin，请先勾选右侧的联合解析全部Chunk。本程序根据 WorldChunkTool by MHVuze的原理制作: https://github.com/mhvuze/WorldChunkTool";
                 CombineCheckBox.Content = "联合解析全部Chunk";
                 ExtractBtn.Content = "提取所选文件";
                 FilterLabel.Content = "筛选:";
                 RegExCheckBox.Content = "正则表达式";
+                BasicInfoLabel.Content = "基本信息";
+                PreviewLabel.Content = "预览";
             }
         }
 
         public void checkFilesExist() {
-            string[] filesRequired = { "file.png", "dir.png", "chunk.key", "oo2core_8_win64.dll"};
+            string[] filesRequired = { "file.png", "dir.png", "chunk.key", "oo2core_8_win64.dll", "SharpGL.dll" };
             foreach (string fileRequired in filesRequired) {
                 if (!File.Exists(fileRequired)) { if(!CNMode)errors.Push($"Error: {fileRequired} not found in the executable folder.");
                 else errors.Push($"错误：{fileRequired}未找到");
+                }
+            }
+        }
+
+        public void checkDllVersion() {
+            if (File.Exists("oo2core_8_win64.dll")) {
+                string curMd5 = CalculateMD5("oo2core_8_win64.dll");
+                if (!curMd5.Equals(oo2coreMd5)) {
+                    if (!CNMode) printlog("Error: oo2core_8_win64.dll found but version not matched. Please get this .dll file from somewhere else.");
+                    else { printlog("错误：oo2core_8_win64.dll校验失败，请从另一渠道获取该文件"); }
+                }
+            }
+        }
+
+        //Copy from Jon Skeet @ stack overflow
+        static string CalculateMD5(string filename)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(filename))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
                 }
             }
         }
@@ -313,6 +346,51 @@ namespace MHWNoChunk
         private void FilterBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
             filterText = FilterBox.Text;
+        }
+
+        private void FileTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            FileNode selectedNode = (FileNode)FileTree.SelectedItem;
+            BasicInfoBox.Text = (selectedNode).getPreviewInfo();
+            if (selectedNode.IsFile && selectedNode.Name.EndsWith(".tex")&& previewTex(selectedNode))
+            {
+                setAllPreviewInvisible();
+                PreviewUnsupportedInfoLabel.Visibility = Visibility.Hidden;
+                PreviewImage.Visibility = Visibility.Visible;
+            }
+            else {
+                setAllPreviewInvisible();
+            }
+            
+        }
+
+        public bool previewTex(FileNode texNode) {
+            try {
+                byte[] texdata = null;
+                if (CombineChecked) texdata = ((Chunk)chunkMap.First().Value).getFileData(texNode);
+                else texdata = mainChunk.getFileData(texNode);
+                Bitmap pic = texPreviewer.getPic(texdata);
+                if (pic == null) return false;
+                texStream.Seek(0, SeekOrigin.Begin);
+                texStream.SetLength(0);
+                pic.Save(texStream, ImageFormat.Png);
+                ImageBrush imageBrush = new ImageBrush();
+                ImageSourceConverter imageSourceConverter = new ImageSourceConverter();
+                imageBrush.ImageSource = (ImageSource)imageSourceConverter.ConvertFrom(texStream);
+                PreviewImage.Source = imageBrush.ImageSource;
+                return true;
+            } catch (Exception ex) {
+                if (!CNMode) printlog("Error occured while previewing.");
+                else printlog("预览时发生错误");
+                Console.WriteLine(ex);
+                texPreviewer = new TexPreviewer();
+                return false;
+            }
+        }
+
+        private void setAllPreviewInvisible() {
+            PreviewImage.Visibility = Visibility.Hidden;
+            PreviewUnsupportedInfoLabel.Visibility = Visibility.Visible;
         }
 
         public Chunk getChunk(string chunkfile) {

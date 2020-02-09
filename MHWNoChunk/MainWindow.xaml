@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MHWNoChunk"
         mc:Ignorable="d"
-        Title="MHWNoChunk v2.1.1 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
+        Title="MHWNoChunk v2.2.0 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
     <Grid x:Name="maingrid" AllowDrop="True">
         <Viewbox Stretch="Fill" Grid.ColumnSpan="2">
             <Canvas Width="1200" Height="807">
-                <TextBox x:Name="LogBox" HorizontalAlignment="Left" Height="119" TextWrapping="Wrap" Text="Drag and drop chunkN.bin into the black area above. Check the 'Combine all chunks' option on the right side before dragdrop if you want to merge all chunkNs and extract with all the newest version files.Learns from WorldChunkTool by MHVuze: https://github.com/mhvuze/WorldChunkTool" VerticalAlignment="Top" Width="932" Canvas.Left="10" Canvas.Top="639" FontSize="18" IsReadOnly="True"/>
-                <TreeView x:Name="FileTree" HorizontalAlignment="Left" Height="629" VerticalAlignment="Top" Width="1180" Canvas.Left="10" Canvas.Top="10">
+                <TextBox x:Name="LogBox" HorizontalAlignment="Left" Height="119" TextWrapping="Wrap" Text="Drag and drop chunkN.bin into the black area above. Check the 'Combine all chunks' option on the right side before dragdrop if you want to merge all chunkNs and extract with all the newest version files.Learns from WorldChunkTool by MHVuze: https://github.com/mhvuze/WorldChunkTool" VerticalAlignment="Top" Width="909" Canvas.Left="10" Canvas.Top="639" FontSize="18" IsReadOnly="True"/>
+                <TreeView x:Name="FileTree" HorizontalAlignment="Left" Height="629" VerticalAlignment="Top" Width="909" Canvas.Left="10" Canvas.Top="10" SelectedItemChanged="FileTree_SelectedItemChanged">
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding Childern}">
                             <StackPanel Orientation="Horizontal">
@@ -27,15 +27,20 @@
                         </Style>
                     </TreeView.ItemContainerStyle>
                 </TreeView>
-                <Button x:Name="ExtractBtn" Content="Extract selected" Canvas.Left="947" Canvas.Top="677" Width="243" Height="81" FontSize="28" IsEnabled="False" Click="ExtractBtn_Click" ClickMode="Release" Background="Green"/>
+                <Button x:Name="ExtractBtn" Content="Extract selected" Canvas.Left="924" Canvas.Top="677" Width="266" Height="81" FontSize="28" IsEnabled="False" Click="ExtractBtn_Click" ClickMode="Release" Background="Green"/>
                 <ProgressBar x:Name="progressbar" Height="34" Canvas.Left="10" Canvas.Top="763" Width="1180" Maximum="100"/>
-                <CheckBox x:Name="CombineCheckBox"  Content="Merge all chunks" Canvas.Left="947" Canvas.Top="644" Height="28" Width="243" VerticalContentAlignment="Center" FontSize="20" Checked="CombineCheckBox_Checked" Unchecked="CombineCheckBox_Unchecked"/>
+                <CheckBox x:Name="CombineCheckBox"  Content="Merge all chunks" Canvas.Left="924" Canvas.Top="644" Height="28" Width="266" VerticalContentAlignment="Center" FontSize="20" Checked="CombineCheckBox_Checked" Unchecked="CombineCheckBox_Unchecked"/>
                 <Label Content="{Binding Value, ElementName=progressbar}" Canvas.Left="391" Canvas.Top="763" Height="34" Width="193" HorizontalContentAlignment="Right" FontSize="20"/>
                 <Label Content="/" Canvas.Left="588" Canvas.Top="761" Height="34" Width="19" FontSize="20"/>
                 <Label Content="{Binding Maximum, ElementName=progressbar}" Canvas.Left="607" Canvas.Top="763" Height="34" Width="199"  HorizontalContentAlignment="Left" FontSize="20"/>
                 <TextBox x:Name="FilterBox" Height="23" Canvas.Left="961" TextWrapping="Wrap" Text="" Canvas.Top="10" Width="229" KeyUp="FilterBox_KeyUp"/>
                 <Label x:Name="FilterLabel" Content="Filter:" Canvas.Left="919" Canvas.Top="8"/>
                 <CheckBox x:Name="RegExCheckBox" Content="Regular Expression" Canvas.Left="960" Canvas.Top="33" Height="16" Width="128" Checked="RegExCheckBox_Checked" Unchecked="RegExCheckBox_Checked"/>
+                <Label x:Name="BasicInfoLabel" Content="Basic information:" Canvas.Left="919" Canvas.Top="54" Height="28" Width="281"/>
+                <TextBox x:Name="BasicInfoBox" Text="" Canvas.Left="924" Canvas.Top="82" Height="216" Width="266" IsReadOnly="True" TextWrapping="Wrap" BorderThickness="0"/>
+                <Label x:Name="PreviewLabel" Content="Preview:" Canvas.Left="919" Canvas.Top="303" Height="28" Width="281"/>
+                <Label x:Name="PreviewUnsupportedInfoLabel" Content="File format not supported" Canvas.Left="919" Canvas.Top="331" Height="23" Width="281"/>
+                <Image x:Name="PreviewImage" Height="303" Canvas.Left="924" Canvas.Top="331" Width="266"/>
             </Canvas>
         </Viewbox>
     </Grid>

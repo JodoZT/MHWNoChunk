@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+using System.IO;
 
 namespace MHWNoChunk
 {
@@ -99,6 +96,11 @@ namespace MHWNoChunk
             return sizestr;
         }
 
+        public string getPreviewInfo() {
+            if (!MainWindow.CNMode) return $"Path: {EntireName}\nType: {(IsFile ? "file" : $"folder\nChildren: {Childern.Count}")}\nSize: {getSizeStr(Size)}\nFrom: {FromChunk}\n";
+            else { return $"路径: {EntireName}\n类型: {(IsFile ? "文件" : $"文件夹\n子项: {Childern.Count}")}\n尺寸: {getSizeStr(Size)}\n来自: {FromChunk}\n"; }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public FileNode(string name, bool isFile, string fromChunk)
@@ -111,7 +113,7 @@ namespace MHWNoChunk
             Childern = new List<FileNode>();
             IsSelected = false;
             FromChunk = fromChunk;
-            FromChunkName = $"({System.IO.Path.GetFileNameWithoutExtension(fromChunk)})";
+            FromChunkName = $"({Path.GetFileNameWithoutExtension(fromChunk)})";
         }
     }
 }
