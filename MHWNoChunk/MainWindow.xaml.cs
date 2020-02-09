@@ -74,6 +74,7 @@ namespace MHWNoChunk
                 RegExCheckBox.Content = "正则表达式";
                 BasicInfoLabel.Content = "基本信息";
                 PreviewLabel.Content = "预览";
+                PreviewUnsupportedInfoLabel.Content = "暂不支持该格式文件预览";
             }
         }
 
