@@ -20,6 +20,7 @@ namespace MHWNoChunk
         private int pic_width;
         public OpenGL gl = new OpenGL();
         public GCHandle pixelsHandle;
+        private bool failed = false;
 
 
         public TexPreviewer()
@@ -27,14 +28,24 @@ namespace MHWNoChunk
             if (!gl.Create(OpenGLVersion.OpenGL4_2, RenderContextType.HiddenWindow, 1, 1, 32, null))
             {
                 Console.Error.WriteLine("ERROR: Unable to initialize OpenGL 4.2");
+                failed = true;
             }
         }
 
         //Learned from https://github.com/Qowyn/MHWTexToPng
         public Bitmap getPic(byte[] texData)
         {
+            if (failed) return null;
+            gl.Flush();
+            gl.RenderContextProvider.Dispose();
+            gl.RenderContextProvider.Destroy();
+            if (!gl.Create(OpenGLVersion.OpenGL4_2, RenderContextType.HiddenWindow, 1, 1, 32, null))
+            {
+                Console.Error.WriteLine("ERROR: Unable to initialize OpenGL 4.2");
+                failed = true;
+                return null;
+            }
             MemoryStream texStream = new MemoryStream(texData);
-
             using (BinaryReader reader = new BinaryReader(texStream))
             {
                 int magicNumber = reader.ReadInt32();
@@ -104,6 +115,9 @@ namespace MHWNoChunk
                     byte[] data = reader.ReadBytes(width * height * 4);
                     pixelsHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
                     Bitmap texture = new Bitmap(width, height, width * 4, PixelFormat.Format32bppArgb, pixelsHandle.AddrOfPinnedObject());
+                    texStream.Close();
+                    reader.Close();
+                    pixelsHandle.Free();
                     return texture;
                 }
                 else
@@ -112,12 +126,14 @@ namespace MHWNoChunk
                     GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
                     gl.CompressedTexImage2D(OpenGL.GL_TEXTURE_2D, 0, internalFormat, width, height, 0, size, dataHandle.AddrOfPinnedObject());
                     dataHandle.Free();
-                    int[] pixels = new int[width * height];
+                    int[] pixels = new int[width * height * 2];
                     pixelsHandle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
-                    gl.GetTexImage(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, pixels);
+                    try { gl.GetTexImage(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, pixels); }
+                    catch (Exception ex) {}
                     Bitmap texture = new Bitmap(width, height, width * 4, PixelFormat.Format32bppArgb, pixelsHandle.AddrOfPinnedObject());
                     texStream.Close();
                     reader.Close();
+                    pixelsHandle.Free();
                     return texture;
                 }
             }

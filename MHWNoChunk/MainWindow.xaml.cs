@@ -44,8 +44,10 @@ namespace MHWNoChunk
         Dictionary<string, Chunk> chunkMap = new Dictionary<string, Chunk>();
         TexPreviewer texPreviewer = new TexPreviewer();
         MemoryStream texStream = new MemoryStream();
+        bool enablePreview = false;
         static string oo2core8Md5 = "9b7f9e3e4931b80257da5e1b626db43a"; 
         static string oo2core7Md5 = "b486c6f46a3d802966d04911a619b2ed";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -73,7 +75,7 @@ namespace MHWNoChunk
                 FilterLabel.Content = "筛选:";
                 RegExCheckBox.Content = "正则表达式";
                 BasicInfoLabel.Content = "基本信息";
-                PreviewLabel.Content = "预览";
+                PreviewCheckbox.Content = "启用预览";
                 PreviewUnsupportedInfoLabel.Content = "暂不支持该格式文件预览";
             }
         }
@@ -354,20 +356,23 @@ namespace MHWNoChunk
         {
             FileNode selectedNode = (FileNode)FileTree.SelectedItem;
             BasicInfoBox.Text = (selectedNode).getPreviewInfo();
-            if (selectedNode.IsFile && selectedNode.Name.EndsWith(".tex")&& previewTex(selectedNode))
-            {
-                setAllPreviewInvisible();
-                PreviewUnsupportedInfoLabel.Visibility = Visibility.Hidden;
-                PreviewImage.Visibility = Visibility.Visible;
-            }
-            else {
-                setAllPreviewInvisible();
+            if (enablePreview) {
+                if (selectedNode.IsFile && selectedNode.Name.EndsWith(".tex")&& previewTex(selectedNode))
+                {
+                    setAllPreviewInvisible();
+                    PreviewUnsupportedInfoLabel.Visibility = Visibility.Hidden;
+                    PreviewImage.Visibility = Visibility.Visible;
+                }
+                else {
+                    setAllPreviewInvisible();
+                }
             }
             
         }
 
         public bool previewTex(FileNode texNode) {
-            try {
+            try
+            {
                 byte[] texdata = null;
                 if (CombineChecked) texdata = ((Chunk)chunkMap.First().Value).getFileData(texNode);
                 else texdata = mainChunk.getFileData(texNode);
@@ -381,7 +386,9 @@ namespace MHWNoChunk
                 imageBrush.ImageSource = (ImageSource)imageSourceConverter.ConvertFrom(texStream);
                 PreviewImage.Source = imageBrush.ImageSource;
                 return true;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 if (!CNMode) printlog("Error occured while previewing.");
                 else printlog("预览时发生错误");
                 Console.WriteLine(ex);
@@ -393,6 +400,13 @@ namespace MHWNoChunk
         private void setAllPreviewInvisible() {
             PreviewImage.Visibility = Visibility.Hidden;
             PreviewUnsupportedInfoLabel.Visibility = Visibility.Visible;
+        }
+
+        private void PreviewCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            enablePreview = PreviewCheckbox.IsChecked == null? false:(bool)PreviewCheckbox.IsChecked;
+            if (!enablePreview) setAllPreviewInvisible();
+            PreviewUnsupportedInfoLabel.Visibility = Visibility.Hidden;
         }
 
         public Chunk getChunk(string chunkfile) {

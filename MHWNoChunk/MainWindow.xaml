@@ -38,9 +38,9 @@
                 <CheckBox x:Name="RegExCheckBox" Content="Regular Expression" Canvas.Left="960" Canvas.Top="33" Height="16" Width="128" Checked="RegExCheckBox_Checked" Unchecked="RegExCheckBox_Checked"/>
                 <Label x:Name="BasicInfoLabel" Content="Basic information:" Canvas.Left="919" Canvas.Top="54" Height="28" Width="281"/>
                 <TextBox x:Name="BasicInfoBox" Text="" Canvas.Left="924" Canvas.Top="82" Height="216" Width="266" IsReadOnly="True" TextWrapping="Wrap" BorderThickness="0"/>
-                <Label x:Name="PreviewLabel" Content="Preview:" Canvas.Left="919" Canvas.Top="303" Height="28" Width="281"/>
                 <Label x:Name="PreviewUnsupportedInfoLabel" Content="File format not supported" Canvas.Left="919" Canvas.Top="331" Height="23" Width="281"/>
                 <Image x:Name="PreviewImage" Height="303" Canvas.Left="924" Canvas.Top="331" Width="266"/>
+                <CheckBox x:Name="PreviewCheckbox" Content="Enable Preview" Canvas.Left="919" Canvas.Top="309" Height="23" Width="281" Checked="PreviewCheckbox_Checked" Unchecked="PreviewCheckbox_Checked"/>
             </Canvas>
         </Viewbox>
     </Grid>
