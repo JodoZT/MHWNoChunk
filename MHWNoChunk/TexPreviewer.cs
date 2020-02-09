@@ -15,7 +15,6 @@ namespace MHWNoChunk
     class TexPreviewer
     {
         const int MagicNumberTex = 0x00584554; // 54 45 58 00 | TEX 
-        private string cur_loc = "";
         private int pic_type = 0x0;
         private int pic_height;
         private int pic_width;
