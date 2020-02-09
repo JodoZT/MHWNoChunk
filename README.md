@@ -18,6 +18,10 @@ For working on a keygen regarding Iceborne chunk encryption: MoonBunnie, Asteris
 
 For help with bruteforcing the Iceborne chunk key order early on: Vuze, XunLi, Asterisk, Dallagen, MoonBunnie, Kiranico, DMQW, Aradi147, Ice, Miralis﻿
 
+For texture preview function: Qowyn
+
+For other programming issues: rz7d, KeisukeOkaya
+
 ## What this tool can do:
 * Decompress part of the MHW chunk file as you want. 
 * 2x speed and 0.5x disk usage.
@@ -27,7 +31,9 @@ For help with bruteforcing the Iceborne chunk key order early on: Vuze, XunLi, A
 [Nexusmods Page](https://www.nexusmods.com/monsterhunterworld/mods/411)
 
 ## Updates:
+* v2.2.0:
 
+    Add preview to texture files.
 * v2.1.0:
 
     Update keys for IceBorne. Enable filter to file name.
