@@ -45,7 +45,8 @@ namespace MHWNoChunk
         TexPreviewer texPreviewer = new TexPreviewer();
         MemoryStream texStream = new MemoryStream();
         bool enablePreview = false;
-        static string oo2core8Md5 = "9b7f9e3e4931b80257da5e1b626db43a"; 
+        static string oo2core8Md5_1 = "9b7f9e3e4931b80257da5e1b626db43a";
+        static string oo2core8Md5_2 = "c1a0dd317543035221327d44f07c3d06";
         static string oo2core7Md5 = "b486c6f46a3d802966d04911a619b2ed";
 
         public MainWindow()
@@ -92,7 +93,7 @@ namespace MHWNoChunk
         public void checkDllVersion() {
             if (File.Exists("oo2core_8_win64.dll")) {
                 string curMd5 = CalculateMD5("oo2core_8_win64.dll");
-                if (!curMd5.Equals(oo2core8Md5) && !curMd5.Equals(oo2core7Md5))
+                if (!curMd5.Equals(oo2core8Md5_1) && !curMd5.Equals(oo2core8Md5_2) && !curMd5.Equals(oo2core7Md5))
                 {
                     if (!CNMode) printlog("Error: oo2core_8_win64.dll found but version not matched. Please get this .dll file from somewhere else.");
                     else { printlog("错误：oo2core_8_win64.dll校验失败，请从另一渠道获取该文件"); }
