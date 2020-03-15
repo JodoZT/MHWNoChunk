@@ -31,6 +31,9 @@ For other programming issues: rz7d, KeisukeOkaya
 [Nexusmods Page](https://www.nexusmods.com/monsterhunterworld/mods/411)
 
 ## Updates:
+* v2.2.1:
+
+    Fix bug that causes crash.
 * v2.2.0:
 
     Add preview to texture files.
