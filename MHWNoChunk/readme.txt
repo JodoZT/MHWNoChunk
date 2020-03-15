@@ -18,6 +18,8 @@ For other programming issues: rz7d, KeisukeOkaya
 This tool can decompress part of the MHW chunk file as you want. 
 ﻿2x speed and 0.5x disk usage. No .PKG file created.
 
+v2.2.1 update:
+Fix bug.
 v2.2.0 update:
 Add preview for texture files.
 v2.1.1 update:
@@ -60,6 +62,7 @@ WorldChunkTool GitHub链接: https://github.com/mhvuze/WorldChunkTool
 ﻿
 自选解包，一步到位，立等可取，不需要生成中间文件浪费空间，2x速度，0.5x磁盘占用。
 
+v2.2.1 修复闪退bug
 v2.2.0 添加tex文件预览
 v2.1.1 增加错误信息，添加图标，使用只读读取chunk文件
 v2.1.0 更新冰原版chunk.key
