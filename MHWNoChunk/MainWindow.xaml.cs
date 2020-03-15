@@ -282,10 +282,12 @@ namespace MHWNoChunk
         // Update progress bar
         public void setProgressbar(int value, int total)
         {
+            if (total == 0) return;
             if (value > total) value = total;
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                progressbar.Value = value * 100 / total;
+                if (total == 0)progressbar.Value = 0;
+                else progressbar.Value = value * 100 / total;
             }));
         }
 
