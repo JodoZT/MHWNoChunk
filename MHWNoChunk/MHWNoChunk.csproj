@@ -71,8 +71,9 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>nochunk.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\nochunk.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup />
   <PropertyGroup>
     <NoWin32Manifest>true</NoWin32Manifest>
@@ -151,7 +152,7 @@
   <ItemGroup>
     <Resource Include="Resources\dir.png" />
     <Resource Include="Resources\file.png" />
-    <Resource Include="nochunk.ico" />
+    <Resource Include="Resources\nochunk.ico" />
     <Content Include="readme.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
