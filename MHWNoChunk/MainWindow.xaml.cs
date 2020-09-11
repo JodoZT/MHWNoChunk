@@ -187,6 +187,7 @@ namespace MHWNoChunk
                 ExtractBtn.IsEnabled = true;
                 RegExCheckBox.IsEnabled = true;
                 FilterBox.IsEnabled = true;
+                ApplyFilterBtn.IsEnabled = true;
                 PauseBtn.Visibility = Visibility.Hidden;
                 TerminateBtn.Visibility = Visibility.Hidden;
                 PauseBtn.Background = System.Windows.Media.Brushes.Orange;
