@@ -199,7 +199,7 @@ namespace MHWNoChunk
             foreach (FileNode node in itemlist)
             {
 
-                while (mainWindow.PauseFlag) {Thread.Sleep(500); if (mainWindow.TerminateFlag) break; }
+                while (mainWindow.PauseFlag) {Thread.Sleep(200); if (mainWindow.TerminateFlag) break; }
                 if (mainWindow.TerminateFlag) break;
                 try
                 {

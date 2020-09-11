@@ -189,6 +189,8 @@ namespace MHWNoChunk
                 FilterBox.IsEnabled = true;
                 PauseBtn.Visibility = Visibility.Hidden;
                 TerminateBtn.Visibility = Visibility.Hidden;
+                PauseBtn.Background = System.Windows.Media.Brushes.Orange;
+                PauseBtn.Content = CNMode ? "暂停" : "Pause";
                 terminateFlag = false;
                 pauseFlag = false;
             }));
