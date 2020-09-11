@@ -56,6 +56,7 @@ MHW部分解包器：
 由Jodo @ 狩技MOD组开发
 MHWNoChunk Nexusmods 链接: https://www.nexusmods.com/monsterhunterworld/mods/411
 MHWNoChunk Github 链接: https://github.com/zhangtaoxinzi/MHWNoChunk
+MHWNoChunk 狩技官网链接: http://www.mhwmod.com/archives/495
 
 本工具学习了WorldChunkTool的解包原理，非常感谢原作者MHVuze在游戏文件解包方面作出的重要贡献。
 WorldChunkTool Nexusmods链接 :https://www.nexusmods.com/monsterhunterworld/mods/6/
@@ -64,6 +65,7 @@ WorldChunkTool GitHub链接: https://github.com/mhvuze/WorldChunkTool
 ﻿
 自选解包，一步到位，立等可取，不需要生成中间文件浪费空间，2x速度，0.5x磁盘占用。
 
+v2.3.0 beta版，重写过滤功能
 v2.2.1 修复闪退bug
 v2.2.0 添加tex文件预览
 v2.1.1 增加错误信息，添加图标，使用只读读取chunk文件

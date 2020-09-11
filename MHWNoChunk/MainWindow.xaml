@@ -14,7 +14,7 @@
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding Childern}">
                             <StackPanel Orientation="Horizontal">
-                                <CheckBox Content="" FontSize="14" IsChecked="{Binding Path=IsSelected,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                <CheckBox Content="" FontSize="14" IsChecked="{Binding Path=IsSelected,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEnabled, ElementName=ApplyFilterBtn}"></CheckBox>
                                 <Image VerticalAlignment="Center" Source="{Binding Path=Icon}" Width="16" Height="16" Margin="0,0,2,2"></Image>
                                 <TextBlock Text="{Binding NameWithSize}"/>
                                 <TextBlock Text="{Binding FromChunkName}"/>

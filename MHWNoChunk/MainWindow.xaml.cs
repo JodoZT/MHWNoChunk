@@ -78,6 +78,8 @@ namespace MHWNoChunk
                 PreviewCheckbox.Content = "启用预览";
                 PreviewUnsupportedInfoLabel.Content = "暂不支持该格式文件预览";
                 ApplyFilterBtn.Content = "应用";
+                PauseBtn.Content = "暂停";
+                TerminateBtn.Content = "取消";
             }
         }
 
@@ -158,6 +160,9 @@ namespace MHWNoChunk
                     ExtractBtn.IsEnabled = true;
                     RegExCheckBox.IsEnabled = true;
                     FilterBox.IsEnabled = true;
+                    ApplyFilterBtn.IsEnabled = true;
+                    PauseBtn.Visibility = Visibility.Hidden;
+                    TerminateBtn.Visibility = Visibility.Hidden;
                 }));
                 return;
             }
@@ -185,6 +190,7 @@ namespace MHWNoChunk
                 PauseBtn.Visibility = Visibility.Hidden;
                 TerminateBtn.Visibility = Visibility.Hidden;
                 terminateFlag = false;
+                pauseFlag = false;
             }));
             if (!CNMode) PrintLog("Finished!");
             else PrintLog("提取完成！");
@@ -222,13 +228,13 @@ namespace MHWNoChunk
                     if (mergeChecked)
                     {
                         FileInfo chosenChunkFileInfo = new FileInfo(filename);
-                        string[] chunkfiles = Directory.GetFiles(chosenChunkFileInfo.DirectoryName, "chunkG*.bin");
-                        Array.Sort(chunkfiles, (a, b) => int.Parse(Regex.Replace(a, "[^0-9]", "")) - int.Parse(Regex.Replace(b, "[^0-9]", "")));
-                        foreach (string filenameEach in chunkfiles)
+                        string[] chunkFiles = Directory.GetFiles(chosenChunkFileInfo.DirectoryName, "chunkG*.bin");
+                        Array.Sort(chunkFiles, (a, b) => int.Parse(Regex.Replace(a, "[^0-9]", "")) - int.Parse(Regex.Replace(b, "[^0-9]", "")));
+                        foreach (string fileNameEach in chunkFiles)
                         {
                             Chunk cur_chunk = new Chunk();
-                            fileNodeList = cur_chunk.AnalyzeChunk(filenameEach, this, fileNodeList);
-                            chunkMap.Add(filenameEach, cur_chunk);
+                            fileNodeList = cur_chunk.AnalyzeChunk(fileNameEach, this, fileNodeList);
+                            chunkMap.Add(fileNameEach, cur_chunk);
                         }
                         if (fileNodeList.Count > 0)
                         {
@@ -335,6 +341,9 @@ namespace MHWNoChunk
             ExtractBtn.IsEnabled = false;
             RegExCheckBox.IsEnabled = false;
             FilterBox.IsEnabled = false;
+            ApplyFilterBtn.IsEnabled = false;
+            PauseBtn.Visibility = Visibility.Visible;
+            TerminateBtn.Visibility = Visibility.Visible;
             extractWorker.RunWorkerAsync();
         }
 
@@ -439,7 +448,7 @@ namespace MHWNoChunk
 
         private void PauseBtn_Click(object sender, RoutedEventArgs e)
         {
-            pauseFlag = !PauseFlag;
+            pauseFlag = !pauseFlag;
             if (PauseFlag)
             {
                 PauseBtn.Background = System.Windows.Media.Brushes.Green;

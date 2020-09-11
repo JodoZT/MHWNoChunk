@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace MHWNoChunk
 {
@@ -197,8 +198,9 @@ namespace MHWNoChunk
             int failed = 0;
             foreach (FileNode node in itemlist)
             {
+
+                while (mainWindow.PauseFlag) {Thread.Sleep(500); if (mainWindow.TerminateFlag) break; }
                 if (mainWindow.TerminateFlag) break;
-                while (mainWindow.PauseFlag) ;
                 try
                 {
                     if (node.Childern.Count > 0)
