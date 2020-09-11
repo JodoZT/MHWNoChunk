@@ -18,6 +18,8 @@ For other programming issues: rz7d, KeisukeOkaya
 This tool can decompress part of the MHW chunk file as you want. 
 ﻿2x speed and 0.5x disk usage. No .PKG file created.
 
+v2.3.0 beta update:
+Refactored a bunch of code and rewrote the logic of the filter function. Beta version.
 v2.2.1 update:
 Fix bug.
 v2.2.0 update:

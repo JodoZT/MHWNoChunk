@@ -5,19 +5,15 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MHWNoChunk
 {
     class TexPreviewer
     {
         const int MagicNumberTex = 0x00584554; // 54 45 58 00 | TEX 
-        private int pic_type = 0x0;
-        private int pic_height;
-        private int pic_width;
+        private int texType = 0x0;
+        private int texHeight;
+        private int texWidth;
         public OpenGL gl = new OpenGL();
         public GCHandle pixelsHandle;
         private bool failed = false;
@@ -27,13 +23,13 @@ namespace MHWNoChunk
         {
             if (!gl.Create(OpenGLVersion.OpenGL4_2, RenderContextType.HiddenWindow, 1, 1, 32, null))
             {
-                Console.Error.WriteLine("ERROR: Unable to initialize OpenGL 4.2");
+                Console.Error.WriteLine("ERROR: Unable to initialize OpenGL");
                 failed = true;
             }
         }
 
         //Learned from https://github.com/Qowyn/MHWTexToPng
-        public Bitmap getPic(byte[] texData)
+        public Bitmap GetPic(byte[] texData)
         {
             if (failed) return null;
             gl.Flush();
@@ -41,7 +37,7 @@ namespace MHWNoChunk
             gl.RenderContextProvider.Destroy();
             if (!gl.Create(OpenGLVersion.OpenGL4_2, RenderContextType.HiddenWindow, 1, 1, 32, null))
             {
-                Console.Error.WriteLine("ERROR: Unable to initialize OpenGL 4.2");
+                Console.Error.WriteLine("ERROR: Unable to initialize OpenGL");
                 failed = true;
                 return null;
             }
@@ -55,8 +51,8 @@ namespace MHWNoChunk
                 int mipMapCount = reader.ReadInt32();
                 int width = reader.ReadInt32();
                 int height = reader.ReadInt32();
-                pic_height = height;
-                pic_width = width;
+                texHeight = height;
+                texWidth = width;
 
                 reader.BaseStream.Position = 0x24;
 
@@ -110,7 +106,7 @@ namespace MHWNoChunk
                     reader.Close();
                     return null;
                 }
-                this.pic_type = type;
+                texType = type;
                 if (internalFormat == 0x57) {
                     byte[] data = reader.ReadBytes(width * height * 4);
                     pixelsHandle = GCHandle.Alloc(data, GCHandleType.Pinned);

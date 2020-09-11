@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace MHWNoChunk
 {
@@ -20,10 +21,9 @@ namespace MHWNoChunk
         public string FromChunk { get; set; }
         public string FromChunkName { get; set; }
 
-        private bool isSelected;
+        private bool? isSelected;
 
-        public bool IsSelected
-        {
+        public bool? IsSelected {
             get { return isSelected; }
             set
             {
@@ -36,22 +36,35 @@ namespace MHWNoChunk
             }
         }
 
+        private bool visible;
+        
+        public bool Visible {
+            get { return visible; }
+            set
+            {
+                visible = value;
+                if (this.PropertyChanged != null)
+                {
+                    this.PropertyChanged.Invoke(this, new PropertyChangedEventArgs("Visible"));
+                }
+            }
+        }
+
         public int getSelectedCount() {
             int count = 0;
             foreach (FileNode node in Childern) {
                 count += node.getSelectedCount();
             }
-            if (IsFile && IsSelected) {
+            if (IsFile && IsSelected != false) {
                 count++;
             }
             return count;
         }
 
-        public void setChilrenSelected(bool selected)
-        {
+        public void setChilrenSelected(bool? selected) {
             foreach (FileNode child in Childern)
             {
-                child.IsSelected = selected;
+                if(child.Visible)child.IsSelected = selected;
             }
         }
 
@@ -101,19 +114,57 @@ namespace MHWNoChunk
             else { return $"路径: {EntireName}\n类型: {(IsFile ? "文件" : $"文件夹\n子项: {Childern.Count}")}\n尺寸: {getSizeStr(Size)}\n来自: {FromChunk}\n"; }
         }
 
+        public void sortChildren(){
+            if (!IsFile && Childern.Count > 0) {
+                foreach (FileNode child in Childern) {
+                    child.sortChildren();
+                }
+                Childern.Sort((x, y) => x.IsFile == y.IsFile ? StringComparer.CurrentCultureIgnoreCase.Compare(x.Name, y.Name) : x.IsFile ? 1 : -1);
+            }
+        }
+
+        public bool filterChildren(Regex filterRegex) {
+            bool TmpVisible = filterRegex.IsMatch(EntireName);
+            foreach (FileNode child in Childern) {
+                bool childVisible = child.filterChildren(filterRegex);
+                TmpVisible |= childVisible;
+            }
+            Visible = TmpVisible;
+            return Visible;
+        }
+
+        public bool filterChildren(string filterText) {
+            bool TmpVisible = EntireName.Contains(filterText);
+            foreach (FileNode child in Childern)
+            {
+                bool childVisible = child.filterChildren(filterText);
+                TmpVisible |= childVisible;
+            }
+            Visible = TmpVisible;
+            return Visible;
+        }
+
+        public void resetVisibility()
+        {
+            Visible = true;
+            foreach (FileNode child in Childern) {
+                child.resetVisibility();
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public FileNode(string name, bool isFile, string fromChunk)
-        {
+        public FileNode(string name, bool isFile, string fromChunk){
             Name = name;
             NameWithSize = "";
             IsFile = isFile;
-            if (isFile) Icon = AppDomain.CurrentDomain.BaseDirectory + "\\file.png";
-            else Icon = AppDomain.CurrentDomain.BaseDirectory + "\\dir.png";
+            if (IsFile) Icon = "pack://application:,,,/Resources/file.png";
+            else Icon = "pack://application:,,,/Resources/dir.png";
             Childern = new List<FileNode>();
             IsSelected = false;
             FromChunk = fromChunk;
             FromChunkName = $"({Path.GetFileNameWithoutExtension(fromChunk)})";
+            Visible = true;
         }
     }
 }
