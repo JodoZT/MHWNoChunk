@@ -69,7 +69,7 @@ namespace MHWNoChunk
             if (CNMode)
             {
                 Title = "MHW部分解包器 v2.3.0 By Jodo @ 狩技MOD组";
-                LogBox.Text = "拖拽chunkN.bin至上方空白区域以开始。如果想要一次性解析全部chunk0-chunkN.bin，请先勾选右侧的联合解析全部Chunk。本程序根据 WorldChunkTool by MHVuze的原理制作: https://github.com/mhvuze/WorldChunkTool";
+                LogBox.Text = "拖拽任意chunkGN.bin至上方空白区域以开始。如果想要一次性解析全部chunkG0-chunkGN.bin，请先勾选右侧的联合解析全部Chunk。本程序根据WorldChunkTool by MHVuze的原理制作";
                 MergeCheckBox.Content = "联合解析全部Chunk";
                 ExtractBtn.Content = "提取所选文件";
                 FilterLabel.Content = "筛选:";
