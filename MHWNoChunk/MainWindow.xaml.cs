@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Security.Cryptography;
+using System.Windows.Media.Animation;
 
 namespace MHWNoChunk
 {
@@ -38,7 +39,7 @@ namespace MHWNoChunk
         bool regexEnabled = false;
         bool pauseFlag = false;
         bool terminateFlag = false;
-        
+
         Chunk mainChunk;
         Dictionary<string, Chunk> chunkMap = new Dictionary<string, Chunk>();
         Regex filterRegex = null;
@@ -50,6 +51,8 @@ namespace MHWNoChunk
         public MainWindow()
         {
             InitializeComponent();
+
+            SizeChanged += new SizeChangedEventHandler(MainWindowResizeHandler);
             PreviewUnsupportedInfoLabel.Visibility = Visibility.Hidden;
             analyzeWorker = new BackgroundWorker();
             analyzeWorker.WorkerSupportsCancellation = true;
@@ -64,15 +67,16 @@ namespace MHWNoChunk
             PrintErrorInfo();
         }
 
-        private void InitChinese() {
+        private void InitChinese()
+        {
             if (System.Globalization.CultureInfo.InstalledUICulture.Name == "zh-CN") CNMode = true;
             if (CNMode)
             {
-                Title = "MHW部分解包器 v2.3.0 By Jodo @ 狩技MOD组";
+                Title = "MHW部分解包器 v3.0.0 By Jodo @ 狩技MOD组";
                 LogBox.Text = "拖拽任意chunkGN.bin至上方空白区域以开始。如果想要一次性解析全部chunkG0-chunkGN.bin，请先勾选右侧的联合解析全部Chunk。本程序根据WorldChunkTool by MHVuze的原理制作";
                 MergeCheckBox.Content = "联合解析全部Chunk";
                 ExtractBtn.Content = "提取所选文件";
-                FilterLabel.Content = "筛选:";
+                MaterialDesignThemes.Wpf.HintAssist.SetHint(FilterBox, "筛选");
                 RegExCheckBox.Content = "正则表达式";
                 BasicInfoLabel.Content = "基本信息";
                 PreviewCheckbox.Content = "启用预览";
@@ -83,17 +87,37 @@ namespace MHWNoChunk
             }
         }
 
-        public void CheckFilesExist() {
-            string[] filesRequired = {"oo2core_8_win64.dll", "SharpGL.dll" };
-            foreach (string fileRequired in filesRequired) {
-                if (!File.Exists(fileRequired)) { if(!CNMode)ErrorsStack.Push($"Error: {fileRequired} not found in the executable folder.");
-                else ErrorsStack.Push($"错误：{fileRequired}未找到");
+        private void MainWindowResizeHandler(object sender, System.EventArgs e)
+        {
+            if (window.ActualHeight <= 530 && BasicInfoCard.IsVisible && previewEnabled)
+            {
+                BasicInfoCard.Visibility = Visibility.Hidden;
+                Grid.SetRowSpan(FilterCard, 2);
+            }
+            else if ((window.ActualHeight <= 530 && !BasicInfoCard.IsVisible && !previewEnabled) || (window.ActualHeight > 530 && !BasicInfoCard.IsVisible))
+            {
+                BasicInfoCard.Visibility = Visibility.Visible;
+                Grid.SetRowSpan(FilterCard, 1);
+            }
+        }
+
+        public void CheckFilesExist()
+        {
+            string[] filesRequired = { "oo2core_8_win64.dll", "SharpGL.dll" };
+            foreach (string fileRequired in filesRequired)
+            {
+                if (!File.Exists(fileRequired))
+                {
+                    if (!CNMode) ErrorsStack.Push($"Error: {fileRequired} not found in the executable folder.");
+                    else ErrorsStack.Push($"错误：{fileRequired}未找到");
                 }
             }
         }
 
-        public void CheckDllVersion() {
-            if (File.Exists("oo2core_8_win64.dll")) {
+        public void CheckDllVersion()
+        {
+            if (File.Exists("oo2core_8_win64.dll"))
+            {
                 string curMd5 = CalculateMD5("oo2core_8_win64.dll");
                 if (!KnownCoreMd5.Any<string>(x => x.Equals(curMd5)))
                 {
@@ -120,7 +144,7 @@ namespace MHWNoChunk
         {
             while (ErrorsStack.Count > 0)
             {
-                PrintLog(ErrorsStack.Pop(),false,false);
+                PrintLog(ErrorsStack.Pop(), false, false);
             }
         }
 
@@ -171,14 +195,16 @@ namespace MHWNoChunk
                 PrintLog("Export to: " + outputDirectory, true);
                 PrintLog("It may take a long time to extract all the files you selected which depends on the file size and amount you selected.");
             }
-            else {
+            else
+            {
                 PrintLog("解包至: " + outputDirectory, true);
                 PrintLog("根据你所选取的文件数量和大小，这可能会花费很长时间，请耐心等待");
             }
             int failed = 0;
             if (mergeChecked) chunkMap.FirstOrDefault().Value.ExtractSelected(fileNodeList, outputDirectory, this);
             else failed = mainChunk.ExtractSelected(fileNodeList, outputDirectory, this);
-            if (failed > 0) {
+            if (failed > 0)
+            {
                 if (!CNMode) PrintLog($"{failed} files failed to extract in total.");
                 else PrintLog($"总计{failed}个文件提取失败");
             }
@@ -202,10 +228,12 @@ namespace MHWNoChunk
         // To analyze the chunkN.bin
         private void analyze(string filename)
         {
-            if (!File.Exists(filename)) {
+            if (!File.Exists(filename))
+            {
                 if (!CNMode) PrintLog("Error: file does not exist.");
                 else PrintLog("错误：文件不存在");
-                return; }
+                return;
+            }
 
             try
             {
@@ -215,11 +243,13 @@ namespace MHWNoChunk
                 {
                     if (!CNMode) PrintLog("Chunk detected，now analyzing...", true);
                     else PrintLog("检测到chunk文件，正在解析...", true);
-                    if (mergeChecked) {
+                    if (mergeChecked)
+                    {
                         if (!CNMode) PrintLog("Merge mode on. The program will merge all the chunk files.");
                         else PrintLog("联合解析已开启，程序将整合所有chunkN.bin文件");
                     }
-                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_8_win64.dll")) {
+                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_8_win64.dll"))
+                    {
                         if (!CNMode) PrintLog("Error: oo2core_8_win64.dll not found. Download the file from elsewhere to the executable folder.");
                         else PrintLog("错误：未找到oo2core_8_win64.dll，请从其他地方下载该文件至本程序文件夹");
                         return;
@@ -244,7 +274,8 @@ namespace MHWNoChunk
                             fileNodeList[0].sortChildren();
                         }
                     }
-                    else {
+                    else
+                    {
                         mainChunk = new Chunk();
                         fileNodeList = mainChunk.AnalyzeChunk(filename, this, fileNodeList);
                     }
@@ -273,7 +304,8 @@ namespace MHWNoChunk
         // Print log to window
         public void PrintLog(string log, bool clear = false, bool checkError = true)
         {
-            if (checkError) {
+            if (checkError)
+            {
                 PrintErrorInfo();
             }
             if (!clear) Dispatcher.BeginInvoke(new Action(() =>
@@ -298,7 +330,7 @@ namespace MHWNoChunk
             if (value > total) value = total;
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (total == 0)MainProgressBar.Value = 0;
+                if (total == 0) MainProgressBar.Value = 0;
                 else MainProgressBar.Value = value * 100 / total;
             }));
         }
@@ -313,7 +345,7 @@ namespace MHWNoChunk
 
         // Update progress bar
         public void updateExtractProgress(int updateValue = 1)
-        { 
+        {
             extractProgress = extractProgress + updateValue >= totalProgress ? totalProgress : extractProgress + updateValue;
             Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -367,8 +399,13 @@ namespace MHWNoChunk
 
         private void FilterBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            if (FilterBox.Foreground != System.Windows.Media.Brushes.Black)
+            {
+                FilterBox.Foreground = System.Windows.Media.Brushes.Black;
+            }
             filterText = FilterBox.Text;
-            if (e.Key == System.Windows.Input.Key.Enter) {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
                 ApplyFilterBtn_Click(sender, e);
             }
         }
@@ -377,20 +414,23 @@ namespace MHWNoChunk
         {
             FileNode selectedNode = (FileNode)FileTree.SelectedItem;
             BasicInfoBox.Text = (selectedNode).getPreviewInfo();
-            if (previewEnabled) {
-                if (selectedNode.IsFile && selectedNode.Name.EndsWith(".tex")&& PreviewTex(selectedNode))
+            if (previewEnabled)
+            {
+                if (selectedNode.IsFile && selectedNode.Name.EndsWith(".tex") && PreviewTex(selectedNode))
                 {
                     SetAllPreviewInvisible();
                     PreviewUnsupportedInfoLabel.Visibility = Visibility.Hidden;
                     PreviewImage.Visibility = Visibility.Visible;
                 }
-                else {
+                else
+                {
                     SetAllPreviewInvisible();
                 }
             }
         }
 
-        public bool PreviewTex(FileNode texNode) {
+        public bool PreviewTex(FileNode texNode)
+        {
             try
             {
                 byte[] texdata = null;
@@ -417,18 +457,32 @@ namespace MHWNoChunk
             }
         }
 
-        private void SetAllPreviewInvisible() {
+        private void SetAllPreviewInvisible()
+        {
             PreviewImage.Visibility = Visibility.Hidden;
             PreviewUnsupportedInfoLabel.Visibility = Visibility.Visible;
         }
 
         private void PreviewCheckbox_Checked(object sender, RoutedEventArgs e)
         {
-            previewEnabled = PreviewCheckbox.IsChecked == null? false:(bool)PreviewCheckbox.IsChecked;
-            if (!previewEnabled) SetAllPreviewInvisible();
+            previewEnabled = PreviewCheckbox.IsChecked == null ? false : (bool)PreviewCheckbox.IsChecked;
+            if (!previewEnabled)
+            {
+                SetAllPreviewInvisible();
+                Grid.SetRow(PreviewCard, 3);
+                Grid.SetRowSpan(PreviewCard, 1);
+                Grid.SetRowSpan(BasicInfoCard, 2);
+            }
+            else
+            {
+                Grid.SetRow(PreviewCard, 2);
+                Grid.SetRowSpan(PreviewCard, 2);
+                Grid.SetRowSpan(BasicInfoCard, 1);
+            }
             PreviewUnsupportedInfoLabel.Visibility = Visibility.Hidden;
+            MainWindowResizeHandler(sender, e);
         }
-        
+
         private void ApplyFilterBtn_Click(object sender, RoutedEventArgs e)
         {
             if (fileNodeList.Count > 0)
@@ -437,12 +491,24 @@ namespace MHWNoChunk
                 {
                     if (regexEnabled)
                     {
-                        filterRegex = new Regex(filterText);
+                        try
+                        {
+                            filterRegex = new Regex(filterText);
+                        }
+                        catch (Exception reEx)
+                        {
+                            if (CNMode) PrintLog("错误: 不正确的正则表达式");
+                            else PrintLog("Error: Incorrect regular expression.");
+                            filterRegex = null;
+                            FilterBox.Foreground = System.Windows.Media.Brushes.Red;
+                        }
+
                         fileNodeList[0].filterChildren(filterRegex);
                     }
                     else fileNodeList[0].filterChildren(filterText);
                 }
-                else {
+                else
+                {
                     fileNodeList[0].resetVisibility();
                 }
                 FileTree.Focus();
@@ -454,12 +520,13 @@ namespace MHWNoChunk
             pauseFlag = !pauseFlag;
             if (PauseFlag)
             {
-                PauseBtn.Background = System.Windows.Media.Brushes.Green;
-                PauseBtn.Content = CNMode?"恢复":"Resume";
+                PauseBtn.Background = System.Windows.Media.Brushes.LimeGreen;
+                PauseBtn.Content = CNMode ? "恢复" : "Resume";
             }
-            else {
+            else
+            {
                 PauseBtn.Background = System.Windows.Media.Brushes.Orange;
-                PauseBtn.Content = CNMode?"暂停":"Pause";
+                PauseBtn.Content = CNMode ? "暂停" : "Pause";
             }
         }
 
@@ -468,9 +535,11 @@ namespace MHWNoChunk
             terminateFlag = true;
         }
 
-        public Chunk GetChunk(string chunkfile) {
-            if(chunkMap.ContainsKey(chunkfile))return chunkMap[chunkfile];
+        public Chunk GetChunk(string chunkfile)
+        {
+            if (chunkMap.ContainsKey(chunkfile)) return chunkMap[chunkfile];
             return mainChunk;
         }
+
     }
 }

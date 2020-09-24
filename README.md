@@ -31,34 +31,51 @@ For other programming issues: rz7d, KeisukeOkaya
 [Nexusmods Page](https://www.nexusmods.com/monsterhunterworld/mods/411)
 
 ## Updates:
+* v3.0.0:
+
+    Update UI.
+
+* v2.3.0 beta:
+
+    Refactored a bunch of code and rewrote the logic of the filter function.
+
 * v2.2.1:
 
     Fix bug that causes crash.
+
 * v2.2.0:
 
     Add preview to texture files.
+
 * v2.1.0:
 
     Update keys for IceBorne. Enable filter to file name.
+
 * v2.0.0:
 
     Supports iceborne version and never supports the older versions. If you are using the old version, please use the tool of v1.3.2.
     Due to the incomplete crack of the chunk files, only about half of the files will be correctly extracted.
+
 * v1.3.2:
 
     Fixed bug while extracting with chunk10+. Thanks KeisukeOkaya for his work.
+
 * v1.3.1:
 
     Added progressbar value sight. Added auto copy oo2core.
+
 * v1.3.0:
 
     Added combine extract mode. Once combine and extract all files with all the newest version.
+
 * v1.2.1:
 
     Fixed memory leaking problem while extracting big files like bgm_ingame.npck
+
 * v1.2.0:
 
     Added decompressed file size sight.
+
 * v1.1.0:
 
     Added progress bar.﻿

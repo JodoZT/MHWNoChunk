@@ -1,55 +1,127 @@
 ﻿<Window x:Class="MHWNoChunk.MainWindow"
+        x:Name="window"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MHWNoChunk"
         mc:Ignorable="d"
-        Title="MHWNoChunk v2.3.0 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop">
-    <Grid x:Name="maingrid" AllowDrop="True">
-        <Viewbox Stretch="Fill" Grid.ColumnSpan="2">
-            <Canvas Width="1200" Height="807">
-                <TextBox x:Name="LogBox" HorizontalAlignment="Left" Height="119" TextWrapping="Wrap" Text="Drag and drop chunkGN.bin into the black area above. Check the 'Merge all chunks' option on the right side before dragdrop if you want to merge all chunks and extract with all the newest version files.The tool learns from WorldChunkTool by MHVuze." VerticalAlignment="Top" Width="909" Canvas.Left="10" Canvas.Top="639" FontSize="18" IsReadOnly="True"/>
-                <TreeView x:Name="FileTree" HorizontalAlignment="Left" Height="629" VerticalAlignment="Top" Width="909" Canvas.Left="10" Canvas.Top="10" SelectedItemChanged="FileTree_SelectedItemChanged">
-                    <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate ItemsSource="{Binding Childern}">
-                            <StackPanel Orientation="Horizontal">
-                                <CheckBox Content="" FontSize="14" IsChecked="{Binding Path=IsSelected,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEnabled, ElementName=ApplyFilterBtn}"></CheckBox>
-                                <Image VerticalAlignment="Center" Source="{Binding Path=Icon}" Width="16" Height="16" Margin="0,0,2,2"></Image>
-                                <TextBlock Text="{Binding NameWithSize}"/>
-                                <TextBlock Text="{Binding FromChunkName}"/>
-                            </StackPanel>
-                        </HierarchicalDataTemplate>
-                    </TreeView.ItemTemplate>
-                    <TreeView.ItemContainerStyle>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <EventSetter Event="Selected" Handler="TreeViewItem_SelectedItemChanged"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Visible}" Value="false">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TreeView.ItemContainerStyle>
-                </TreeView>
-                <Button x:Name="ExtractBtn" Content="Extract selected" Canvas.Left="924" Canvas.Top="677" Width="266" Height="81" FontSize="28" IsEnabled="False" Click="ExtractBtn_Click" ClickMode="Release" Background="Green"/>
-                <ProgressBar x:Name="MainProgressBar" Height="34" Canvas.Left="10" Canvas.Top="763" Width="1180" Maximum="100"/>
-                <CheckBox x:Name="MergeCheckBox"  Content="Merge all chunks" Canvas.Left="924" Canvas.Top="644" Height="28" Width="266" VerticalContentAlignment="Center" FontSize="20" Checked="MergeCheckBox_Checked" Unchecked="MergeCheckBox_Unchecked"/>
-                <Label Content="{Binding Value, ElementName=MainProgressBar}" Canvas.Left="391" Canvas.Top="763" Height="34" Width="193" HorizontalContentAlignment="Right" FontSize="20"/>
-                <Label Content="/" Canvas.Left="588" Canvas.Top="761" Height="34" Width="19" FontSize="20"/>
-                <Label Content="{Binding Maximum, ElementName=MainProgressBar}" Canvas.Left="607" Canvas.Top="763" Height="34" Width="199"  HorizontalContentAlignment="Left" FontSize="20"/>
-                <TextBox x:Name="FilterBox" Height="23" Canvas.Left="961" TextWrapping="Wrap" Text="" Canvas.Top="10" Width="229" KeyUp="FilterBox_KeyUp" IsEnabled="False"/>
-                <Label x:Name="FilterLabel" Content="Filter:" Canvas.Left="919" Canvas.Top="8"/>
-                <CheckBox x:Name="RegExCheckBox" Content="Use regular expression" Canvas.Left="960" Canvas.Top="33" Height="14" Width="161" Checked="RegExCheckBox_Checked" Unchecked="RegExCheckBox_Checked"/>
-                <Label x:Name="BasicInfoLabel" Content="Basic information:" Canvas.Left="919" Canvas.Top="93" Height="28" Width="281"/>
-                <TextBox x:Name="BasicInfoBox" Text="" Canvas.Left="924" Canvas.Top="126" Height="172" Width="266" IsReadOnly="True" TextWrapping="Wrap" BorderThickness="0"/>
-                <Label x:Name="PreviewUnsupportedInfoLabel" Content="File format not supported" Canvas.Left="919" Canvas.Top="331" Height="23" Width="281"/>
-                <Image x:Name="PreviewImage" Height="303" Canvas.Left="924" Canvas.Top="331" Width="266"/>
-                <CheckBox x:Name="PreviewCheckbox" Content="Enable Preview" Canvas.Left="919" Canvas.Top="309" Height="23" Width="281" Checked="PreviewCheckbox_Checked" Unchecked="PreviewCheckbox_Checked"/>
-                <Button x:Name="ApplyFilterBtn" Content="Apply" Canvas.Left="961" Canvas.Top="48" Width="229" Height="22" Click="ApplyFilterBtn_Click" IsEnabled="False"/>
-                <Button x:Name="PauseBtn" Content="Pause" Canvas.Left="924" Canvas.Top="677" FontSize="25" Width="133" Height="81" Background="Orange" Click="PauseBtn_Click" Visibility="Hidden"/>
-                <Button x:Name="TerminateBtn" Content="Terminate" Canvas.Left="1056" Canvas.Top="677" FontSize="25" Width="133" Height="81" Background="Red" Click="TerminateBtn_Click" Visibility="Hidden"/>
-            </Canvas>
-        </Viewbox>
+        TextElement.Foreground="{DynamicResource MaterialDesignLightForeground}"
+        Background="{DynamicResource MaterialDesignLightBackground}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="14"
+        FontFamily="Microsoft Yahei,微软雅黑"
+        Title="MHWNoChunk v3.0.0 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop" WindowStyle="SingleBorderWindow" MinWidth="716" MinHeight="500" BorderThickness="0">
+    <Grid x:Name="maingrid" AllowDrop="True" ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*" MinHeight="120"></RowDefinition>
+            <RowDefinition Height="3*"></RowDefinition>
+            <RowDefinition Height="3*"></RowDefinition>
+            <RowDefinition Height="36"></RowDefinition>
+            <RowDefinition Height="0"></RowDefinition>
+            <RowDefinition Height="2.5*" MinHeight="100"></RowDefinition>
+            <RowDefinition Height="36"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" MinWidth="400"></ColumnDefinition>
+            <ColumnDefinition Width="*" MinWidth="230" MaxWidth="350"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <materialDesign:Card Grid.Row="0" Grid.Column="0" Grid.RowSpan="4" Padding="8" Margin="8,8,4,4">
+            <TreeView x:Name="FileTree" Width="Auto" SelectedItemChanged="FileTree_SelectedItemChanged">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Childern}">
+                        <StackPanel Orientation="Horizontal" Margin="2,1,3,1">
+                            <CheckBox Content="" FontSize="14" IsChecked="{Binding Path=IsSelected,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEnabled, ElementName=ApplyFilterBtn}"></CheckBox>
+                            <Image VerticalAlignment="Center" Source="{Binding Path=Icon}" Width="16" Height="16" Margin="0,0,2,2"></Image>
+                            <TextBlock Text="{Binding NameWithSize}"/>
+                            <TextBlock Text="{Binding FromChunkName}"/>
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <EventSetter Event="Selected" Handler="TreeViewItem_SelectedItemChanged"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Visible}" Value="false">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TreeView.ItemContainerStyle>
+            </TreeView>
+        </materialDesign:Card>
+        <materialDesign:Card Grid.Row="4" Grid.Column="0" Grid.RowSpan="2" Margin="8,4,4,8" Padding="8">
+            <TextBox x:Name="LogBox" TextWrapping="Wrap" Text="Drag and drop chunkGN.bin into the black area above. Check the 'Merge all chunks' option on the right side before dragdrop if you want to merge all chunks and extract with all the newest version files.The tool learns from WorldChunkTool by MHVuze." Width="Auto" FontSize="18" IsReadOnly="True"/>
+        </materialDesign:Card>
+        <ProgressBar x:Name="MainProgressBar" materialDesign:TransitionAssist.DisableTransitions="True" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Maximum="100" BorderThickness="0"/>
+        <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" ShowGridLines="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="20"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Content="{Binding Value, ElementName=MainProgressBar}" VerticalAlignment="Center" Height="34" Width="{Binding Width,ElementName=MainProgressBar}" HorizontalContentAlignment="Right" FontSize="20"/>
+            <Label Grid.Column="1" Content="/" VerticalAlignment="Center" Width="auto" FontSize="20"/>
+            <Label Grid.Column="2" Content="{Binding Maximum, ElementName=MainProgressBar}" VerticalAlignment="Center" Height="34" Width="auto" HorizontalContentAlignment="Left" FontSize="20"/>
+        </Grid>
+        <materialDesign:Card Grid.Row="4" Grid.Column="1" Grid.RowSpan="2" Margin="4,4,8,8" Padding="4">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <CheckBox Grid.Row="0" Grid.Column="0" Padding="0" x:Name="MergeCheckBox" VerticalAlignment="Center"
+                          Content="Merge all chunks" VerticalContentAlignment="Top" Checked="MergeCheckBox_Checked" Unchecked="MergeCheckBox_Unchecked"/>
+                <Button Grid.Row="1" Grid.Column="0" x:Name="ExtractBtn"
+                        Style="{DynamicResource MaterialDesignRaisedButton}" materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                        Margin="2" Height="Auto" Content="Extract" FontSize="28" IsEnabled="False" Click="ExtractBtn_Click" ClickMode="Release" Focusable="False" />
+                <Grid Grid.Row="1" Grid.Column="0" ShowGridLines="False" Margin="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" x:Name="PauseBtn" Content="Pause" Height="Auto" FontSize="25" Background="Orange" Click="PauseBtn_Click" Visibility="Hidden" Focusable="False"/>
+                    <Button Grid.Column="1" x:Name="TerminateBtn" Content="Terminate" Height="Auto" FontSize="25"  Background="Tomato" Click="TerminateBtn_Click" Visibility="Hidden" Focusable="False"/>
+                </Grid>
+            </Grid>
+        </materialDesign:Card>
+        <materialDesign:Card x:Name="BasicInfoCard" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Margin="4,4,8,4" Padding="4">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" x:Name="BasicInfoLabel" Padding="0" Content="Basic information:" Height="28"/>
+                <TextBox Grid.Row="1" x:Name="BasicInfoBox" Padding="0" Text="" IsReadOnly="True" TextWrapping="Wrap" BorderThickness="0"/>
+            </Grid>
+        </materialDesign:Card>
+
+        <materialDesign:Card x:Name="PreviewCard" Grid.Row="3" Grid.Column="1" Margin="4,4,8,4" Padding="4">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="36"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <CheckBox Grid.Row="0" x:Name="PreviewCheckbox" Padding="0" Content="Enable Preview" VerticalContentAlignment="Top" Checked="PreviewCheckbox_Checked" Unchecked="PreviewCheckbox_Checked"/>
+                <Label Grid.Row="1" x:Name="PreviewUnsupportedInfoLabel" VerticalAlignment="Top" Content="File format not supported"/>
+                <Image Grid.Row="1" x:Name="PreviewImage" VerticalAlignment="Stretch"/>
+            </Grid>
+        </materialDesign:Card>
+
+        <materialDesign:Card x:Name="FilterCard" Grid.Row="0" Grid.Column="1" Margin="4,8,8,4" Padding="4">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" MinHeight="45"></RowDefinition>
+                    <RowDefinition Height="2*" MinHeight="20"></RowDefinition>
+                    <RowDefinition Height="3*" MinHeight="35"></RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBox Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Height="Auto"
+                            materialDesign:HintAssist.Hint="Filter" materialDesign:TextFieldAssist.HasClearButton="True"
+                             Grid.Row="0" x:Name="FilterBox" VerticalAlignment="Stretch" TextWrapping="Wrap" Text="" KeyUp="FilterBox_KeyUp" IsEnabled="False" VerticalContentAlignment="Center"/>
+                <CheckBox Grid.Row="1" VerticalAlignment="Center" x:Name="RegExCheckBox" Padding="0" Content="Regular expression" VerticalContentAlignment="Top" Checked="RegExCheckBox_Checked" Unchecked="RegExCheckBox_Checked"/>
+                <Button Grid.Row="2" x:Name="ApplyFilterBtn" Margin="0,2,0,0" Height="Auto" Content="Apply" Click="ApplyFilterBtn_Click" IsEnabled="False"/>
+            </Grid>
+        </materialDesign:Card>
     </Grid>
 </Window>

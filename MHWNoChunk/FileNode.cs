@@ -23,7 +23,8 @@ namespace MHWNoChunk
 
         private bool? isSelected;
 
-        public bool? IsSelected {
+        public bool? IsSelected
+        {
             get { return isSelected; }
             set
             {
@@ -37,8 +38,9 @@ namespace MHWNoChunk
         }
 
         private bool visible;
-        
-        public bool Visible {
+
+        public bool Visible
+        {
             get { return visible; }
             set
             {
@@ -50,27 +52,34 @@ namespace MHWNoChunk
             }
         }
 
-        public int getSelectedCount() {
+        public int getSelectedCount()
+        {
             int count = 0;
-            foreach (FileNode node in Childern) {
+            foreach (FileNode node in Childern)
+            {
                 count += node.getSelectedCount();
             }
-            if (IsFile && IsSelected != false) {
+            if (IsFile && IsSelected != false)
+            {
                 count++;
             }
             return count;
         }
 
-        public void setChilrenSelected(bool? selected) {
+        public void setChilrenSelected(bool? selected)
+        {
             foreach (FileNode child in Childern)
             {
-                if(child.Visible)child.IsSelected = selected;
+                if (child.Visible) child.IsSelected = selected;
             }
         }
 
-        public long getSize() {
-            if (IsFile) {
-                setNameWithSize(Name, Size); return Size; }
+        public long getSize()
+        {
+            if (IsFile)
+            {
+                setNameWithSize(Name, Size); return Size;
+            }
             else
             {
                 long _size = 0;
@@ -84,11 +93,13 @@ namespace MHWNoChunk
             }
         }
 
-        private void setNameWithSize(string name, long _size) {
+        private void setNameWithSize(string name, long _size)
+        {
             NameWithSize = $"{Name} ({getSizeStr(_size)})";
         }
 
-        public string getSizeStr(long _size) {
+        public string getSizeStr(long _size)
+        {
             string sizestr = "";
             if (_size < 1024)
             {
@@ -109,23 +120,31 @@ namespace MHWNoChunk
             return sizestr;
         }
 
-        public string getPreviewInfo() {
+        public string getPreviewInfo()
+        {
             if (!MainWindow.CNMode) return $"Path: {EntireName}\nType: {(IsFile ? "file" : $"folder\nChildren: {Childern.Count}")}\nSize: {getSizeStr(Size)}\nFrom: {FromChunk}\n";
             else { return $"路径: {EntireName}\n类型: {(IsFile ? "文件" : $"文件夹\n子项: {Childern.Count}")}\n尺寸: {getSizeStr(Size)}\n来自: {FromChunk}\n"; }
         }
 
-        public void sortChildren(){
-            if (!IsFile && Childern.Count > 0) {
-                foreach (FileNode child in Childern) {
+        public void sortChildren()
+        {
+            if (!IsFile && Childern.Count > 0)
+            {
+                foreach (FileNode child in Childern)
+                {
                     child.sortChildren();
                 }
                 Childern.Sort((x, y) => x.IsFile == y.IsFile ? StringComparer.CurrentCultureIgnoreCase.Compare(x.Name, y.Name) : x.IsFile ? 1 : -1);
             }
         }
 
-        public bool filterChildren(Regex filterRegex) {
-            bool TmpVisible = filterRegex.IsMatch(EntireName);
-            foreach (FileNode child in Childern) {
+        public bool filterChildren(Regex filterRegex)
+        {
+            bool TmpVisible;
+            if (filterRegex is null) TmpVisible = true;
+            else TmpVisible = filterRegex.IsMatch(EntireName);
+            foreach (FileNode child in Childern)
+            {
                 bool childVisible = child.filterChildren(filterRegex);
                 TmpVisible |= childVisible;
             }
@@ -133,7 +152,8 @@ namespace MHWNoChunk
             return Visible;
         }
 
-        public bool filterChildren(string filterText) {
+        public bool filterChildren(string filterText)
+        {
             bool TmpVisible = EntireName.Contains(filterText);
             foreach (FileNode child in Childern)
             {
@@ -147,14 +167,16 @@ namespace MHWNoChunk
         public void resetVisibility()
         {
             Visible = true;
-            foreach (FileNode child in Childern) {
+            foreach (FileNode child in Childern)
+            {
                 child.resetVisibility();
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public FileNode(string name, bool isFile, string fromChunk){
+        public FileNode(string name, bool isFile, string fromChunk)
+        {
             Name = name;
             NameWithSize = "";
             IsFile = isFile;

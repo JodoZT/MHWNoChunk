@@ -100,14 +100,16 @@ namespace MHWNoChunk
                         internalFormat = 0;
                         break;
                 }
-                
-                if (internalFormat == 0) {
+
+                if (internalFormat == 0)
+                {
                     texStream.Close();
                     reader.Close();
                     return null;
                 }
                 texType = type;
-                if (internalFormat == 0x57) {
+                if (internalFormat == 0x57)
+                {
                     byte[] data = reader.ReadBytes(width * height * 4);
                     pixelsHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
                     Bitmap texture = new Bitmap(width, height, width * 4, PixelFormat.Format32bppArgb, pixelsHandle.AddrOfPinnedObject());
@@ -125,7 +127,7 @@ namespace MHWNoChunk
                     int[] pixels = new int[width * height * 2];
                     pixelsHandle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
                     try { gl.GetTexImage(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, pixels); }
-                    catch (Exception ex) {}
+                    catch (Exception ex) { }
                     Bitmap texture = new Bitmap(width, height, width * 4, PixelFormat.Format32bppArgb, pixelsHandle.AddrOfPinnedObject());
                     texStream.Close();
                     reader.Close();

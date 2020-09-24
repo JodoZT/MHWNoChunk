@@ -28,7 +28,7 @@ namespace MHWNoChunk
             bindingWindow = mainWindow;
             inputFilePath = inputFile;
             FileInfo inputFileInfo = new FileInfo(inputFilePath);
-            if(!MainWindow.CNMode)mainWindow.PrintLog($"Now analyzing {inputFileInfo.Name}");
+            if (!MainWindow.CNMode) mainWindow.PrintLog($"Now analyzing {inputFileInfo.Name}");
             else mainWindow.PrintLog($"正在解析 {inputFileInfo.Name}");
             chunkCache = new Dictionary<int, byte[]>();
 
@@ -39,7 +39,8 @@ namespace MHWNoChunk
             reader = new BinaryReader(File.OpenRead(inputFile));
 
             // Read header
-            if (reader.ReadInt32() != MagicChunk) {
+            if (reader.ReadInt32() != MagicChunk)
+            {
                 reader.Close();
                 return inputFileNodeList;
             }
@@ -199,7 +200,7 @@ namespace MHWNoChunk
             foreach (FileNode node in itemlist)
             {
 
-                while (mainWindow.PauseFlag) {Thread.Sleep(200); if (mainWindow.TerminateFlag) break; }
+                while (mainWindow.PauseFlag) { Thread.Sleep(200); if (mainWindow.TerminateFlag) break; }
                 if (mainWindow.TerminateFlag) break;
                 try
                 {
@@ -210,7 +211,7 @@ namespace MHWNoChunk
                     else if (node.IsSelected != false)
                     {
                         if (!node.IsFile) new FileInfo(BaseLocation + node.EntireName + "\\").Directory.Create();
-                        else 
+                        else
                         {
                             new FileInfo(BaseLocation + node.EntireName).Directory.Create();
                             File.WriteAllBytes(BaseLocation + node.EntireName, GetFileData(node));
@@ -229,7 +230,8 @@ namespace MHWNoChunk
             return failed;
         }
 
-        public byte[] GetFileData(FileNode node) {
+        public byte[] GetFileData(FileNode node)
+        {
             Chunk curNodeChunk = bindingWindow.GetChunk(node.FromChunk);
             curNodeChunk.curIndex = node.ChunkIndex;
             curNodeChunk.curPointer = node.ChunkPointer;
@@ -261,17 +263,20 @@ namespace MHWNoChunk
         //To get decompressed chunk
         private byte[] GetDecompressedChunk(long offset, long size, BinaryReader reader, int chunkNum)
         {
-            try {if (size != 0)
+            try
             {
-                reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-                byte[] ChunkCompressed = reader.ReadBytes((int)size); // Unsafe cast
-                return DecryptChunk(Utils.Decompress(ChunkCompressed, ChunkCompressed.Length, 0x40000), GetChunkKey(chunkNum));
+                if (size != 0)
+                {
+                    reader.BaseStream.Seek(offset, SeekOrigin.Begin);
+                    byte[] ChunkCompressed = reader.ReadBytes((int)size); // Unsafe cast
+                    return DecryptChunk(Utils.Decompress(ChunkCompressed, ChunkCompressed.Length, 0x40000), GetChunkKey(chunkNum));
+                }
+                else
+                {
+                    reader.BaseStream.Seek(offset, SeekOrigin.Begin);
+                    return DecryptChunk(reader.ReadBytes(0x40000), GetChunkKey(chunkNum));
+                }
             }
-            else
-            {
-                reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-                return DecryptChunk(reader.ReadBytes(0x40000), GetChunkKey(chunkNum));
-            } }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.StackTrace);
@@ -323,12 +328,13 @@ namespace MHWNoChunk
             }
             return tmp;
         }
-        
+
         public static Dictionary<int, int> chunkKeyPattern = new Dictionary<int, int>();
         // Get right chunk encryption key for iteration. Copy from WorldChunkTool.
         public static byte[] GetChunkKey(int i)
         {
-            if (chunkKeyPattern.Count == 0) {
+            if (chunkKeyPattern.Count == 0)
+            {
                 try
                 {
                     BinaryReader keyReader = new BinaryReader(new MemoryStream(Properties.Resources.chunk));
@@ -341,7 +347,8 @@ namespace MHWNoChunk
                     }
                     keyReader.Close();
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     MainWindow.ErrorsStack.Push(ex.Message);
                 }
             }
