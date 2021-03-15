@@ -12,6 +12,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Security.Cryptography;
 using System.Windows.Media.Animation;
+using System.Net;
 
 namespace MHWNoChunk
 {
@@ -23,8 +24,10 @@ namespace MHWNoChunk
             "c1a0dd317543035221327d44f07c3d06",
             "224df07f2fc2bd829f3b221bb5ef1a31",
             "b486c6f46a3d802966d04911a619b2ed",
-            "548800ca453904c9a892521a64d71f73"
+            "548800ca453904c9a892521a64d71f73",
+            "3169b48a9a2086e53c4493c03579902c"
         };
+        const string WarframeOodleURL = "https://origin.warframe.com/origin/00000000/Tools/Oodle/x64/final/oo2core_8_win64.dll.3169B48A9A2086E53C4493C03579902C.lzma";
 
         public bool PauseFlag { get { return pauseFlag; } }
         public bool TerminateFlag { get { return terminateFlag; } }
@@ -62,6 +65,7 @@ namespace MHWNoChunk
             extractWorker.DoWork += new DoWorkEventHandler(DoExtractHandler);
             InitChinese();
             PrintLog("");
+            CheckCoreAutoDownload();
             CheckFilesExist();
             CheckDllVersion();
             PrintErrorInfo();
@@ -98,6 +102,64 @@ namespace MHWNoChunk
             {
                 BasicInfoCard.Visibility = Visibility.Visible;
                 Grid.SetRowSpan(FilterCard, 1);
+            }
+        }
+
+        public void CheckCoreAutoDownload()
+        {
+            if (!File.Exists("oo2core_8_win64.dll"))
+            {
+                DialogResult result = System.Windows.Forms.MessageBox.Show(
+                    "oo2core_8_win64.dll not found. Download latest version from Warframe servers?",
+                    "oo2core_8_win64.dll not found",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    PrintLog("Starting oo2core_8_win64.dll download from Warframe servers.");
+
+                    try
+                    {
+                        MemoryStream compressedData = new MemoryStream();
+
+                        // Read the compressed file from the Warframe server into memory.
+                        var request = HttpWebRequest.Create(WarframeOodleURL);
+                        using (var response = request.GetResponseAsync().Result)
+                        {
+                            using (var responseStream = response.GetResponseStream())
+                            {
+                                responseStream.CopyTo(compressedData);
+                            }
+                        }
+                        compressedData.Position = 0;
+
+                        // Decompress and write to disk.
+                        byte[] properties = new byte[5];
+                        if (compressedData.Read(properties, 0, 5) != 5)
+                            throw (new Exception("input .lzma is too short"));
+
+                        SevenZip.Compression.LZMA.Decoder decoder = new SevenZip.Compression.LZMA.Decoder();
+                        decoder.SetDecoderProperties(properties);
+
+                        var br = new BinaryReader(compressedData);
+                        long decompressedSize = br.ReadInt64();
+                        long compressedSize = compressedData.Length - 8;
+
+                        using (var fileStream = File.Create("oo2core_8_win64.dll"))
+                        {
+                            decoder.Code(compressedData, fileStream, compressedSize, decompressedSize, null);
+                            PrintLog("Completed oo2core_8_win64.dll download.");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        ErrorsStack.Push($"Error: exception while downloading oo2core: {e.Message}");
+                        throw;
+                    }
+
+
+                }
             }
         }
 

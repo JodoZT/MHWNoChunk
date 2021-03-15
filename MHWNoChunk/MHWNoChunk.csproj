@@ -87,6 +87,9 @@
     <Reference Include="MaterialDesignThemes.Wpf, Version=3.2.0.1979, Culture=neutral, PublicKeyToken=df2a72020bd7962a, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignThemes.3.2.0\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="SevenZip, Version=19.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LZMA-SDK.19.0.0\lib\net20\SevenZip.dll</HintPath>
+    </Reference>
     <Reference Include="SharpGL, Version=2.4.1.2, Culture=neutral, PublicKeyToken=27fc851303210b27, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpGL.2.4.1.2\lib\net40-client\SharpGL.dll</HintPath>
     </Reference>
