@@ -1,7 +1,7 @@
 ﻿MHWNoChunk:
 Mainly developed by Jodo @ DMQW Modding Group.
 Nexusmods link to MHWNoChunk: https://www.nexusmods.com/monsterhunterworld/mods/411
-Github link to MHWNoChunk: https://github.com/zhangtaoxinzi/MHWNoChunk
+Github link to MHWNoChunk: https://github.com/JodoZT/MHWNoChunk
 
 ﻿The tool learns from the WorldChunkTool to deal with the decompressing process.  Thanks to the author MHVuze's great work on WorldChunkTool.
 Nexusmods link to ﻿WorldChunkTool :https://www.nexusmods.com/monsterhunterworld/mods/6/
@@ -18,6 +18,8 @@ For other programming issues: rz7d, KeisukeOkaya
 This tool can decompress part of the MHW chunk file as you want. 
 ﻿2x speed and 0.5x disk usage. No .PKG file created.
 
+v3.0.1 update:
+Add auto download oo2core from warframe servers.
 v3.0.0 update:
 Update UI.
 v2.3.0 beta update:
@@ -57,7 +59,7 @@ Fixed bug while extracting with chunk10. Thanks KeisukeOkaya for his work.
 MHW部分解包器：
 由Jodo @ 狩技MOD组开发
 MHWNoChunk Nexusmods 链接: https://www.nexusmods.com/monsterhunterworld/mods/411
-MHWNoChunk Github 链接: https://github.com/zhangtaoxinzi/MHWNoChunk
+MHWNoChunk Github 链接: https://github.com/JodoZT/MHWNoChunk
 MHWNoChunk 狩技官网链接: http://www.mhwmod.com/archives/495
 
 本工具学习了WorldChunkTool的解包原理，非常感谢原作者MHVuze在游戏文件解包方面作出的重要贡献。
@@ -67,6 +69,7 @@ WorldChunkTool GitHub链接: https://github.com/mhvuze/WorldChunkTool
 ﻿
 自选解包，一步到位，立等可取，不需要生成中间文件浪费空间，2x速度，0.5x磁盘占用。
 
+v3.0.0 更新自动下载oo2core
 v3.0.0 更新UI
 v2.3.0 beta版，重写过滤功能
 v2.2.1 修复闪退bug

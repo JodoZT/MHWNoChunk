@@ -12,7 +12,7 @@
         TextElement.FontWeight="Medium"
         TextElement.FontSize="14"
         FontFamily="Microsoft Yahei,微软雅黑"
-        Title="MHWNoChunk v3.0.0 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop" WindowStyle="SingleBorderWindow" MinWidth="716" MinHeight="500" BorderThickness="0">
+        Title="MHWNoChunk v3.0.1 By Jodo @ DMQW Modding Group" Height="807" Width="1200" AllowDrop="True"  DragDrop.Drop="Grid_Drop" WindowStyle="SingleBorderWindow" MinWidth="716" MinHeight="500" BorderThickness="0">
     <Grid x:Name="maingrid" AllowDrop="True" ShowGridLines="False">
         <Grid.RowDefinitions>
             <RowDefinition Height="3*" MinHeight="120"></RowDefinition>
@@ -24,10 +24,11 @@
             <RowDefinition Height="36"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*" MinWidth="400"></ColumnDefinition>
-            <ColumnDefinition Width="*" MinWidth="230" MaxWidth="350"></ColumnDefinition>
+            <ColumnDefinition Width="139*" MinWidth="400"></ColumnDefinition>
+            <ColumnDefinition Width="756*"/>
+            <ColumnDefinition Width="298*" MinWidth="230" MaxWidth="350"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <materialDesign:Card Grid.Row="0" Grid.Column="0" Grid.RowSpan="4" Padding="8" Margin="8,8,4,4">
+        <materialDesign:Card Grid.Row="0" Grid.Column="0" Grid.RowSpan="4" Padding="8" Margin="8,8,4,4" Grid.ColumnSpan="2">
             <TreeView x:Name="FileTree" Width="Auto" SelectedItemChanged="FileTree_SelectedItemChanged">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding Childern}">
@@ -51,11 +52,11 @@
                 </TreeView.ItemContainerStyle>
             </TreeView>
         </materialDesign:Card>
-        <materialDesign:Card Grid.Row="4" Grid.Column="0" Grid.RowSpan="2" Margin="8,4,4,8" Padding="8">
+        <materialDesign:Card Grid.Row="4" Grid.Column="0" Grid.RowSpan="2" Margin="8,4,4,8" Padding="8" Grid.ColumnSpan="2">
             <TextBox x:Name="LogBox" TextWrapping="Wrap" Text="Drag and drop chunkGN.bin into the black area above. Check the 'Merge all chunks' option on the right side before dragdrop if you want to merge all chunks and extract with all the newest version files.The tool learns from WorldChunkTool by MHVuze." Width="Auto" FontSize="18" IsReadOnly="True"/>
         </materialDesign:Card>
-        <ProgressBar x:Name="MainProgressBar" materialDesign:TransitionAssist.DisableTransitions="True" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Maximum="100" BorderThickness="0"/>
-        <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" ShowGridLines="False">
+        <ProgressBar x:Name="MainProgressBar" materialDesign:TransitionAssist.DisableTransitions="True" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Bottom" Maximum="100" BorderThickness="0"/>
+        <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" ShowGridLines="False">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="20"></ColumnDefinition>
@@ -65,7 +66,7 @@
             <Label Grid.Column="1" Content="/" VerticalAlignment="Center" Width="auto" FontSize="20"/>
             <Label Grid.Column="2" Content="{Binding Maximum, ElementName=MainProgressBar}" VerticalAlignment="Center" Height="34" Width="auto" HorizontalContentAlignment="Left" FontSize="20"/>
         </Grid>
-        <materialDesign:Card Grid.Row="4" Grid.Column="1" Grid.RowSpan="2" Margin="4,4,8,8" Padding="4">
+        <materialDesign:Card Grid.Row="4" Grid.Column="2" Grid.RowSpan="2" Margin="4,4,8,8" Padding="4">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="25"></RowDefinition>
@@ -86,7 +87,7 @@
                 </Grid>
             </Grid>
         </materialDesign:Card>
-        <materialDesign:Card x:Name="BasicInfoCard" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Margin="4,4,8,4" Padding="4">
+        <materialDesign:Card x:Name="BasicInfoCard" Grid.Row="1" Grid.Column="2" Grid.RowSpan="2" Margin="4,4,8,4" Padding="4">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="25"></RowDefinition>
@@ -97,7 +98,7 @@
             </Grid>
         </materialDesign:Card>
 
-        <materialDesign:Card x:Name="PreviewCard" Grid.Row="3" Grid.Column="1" Margin="4,4,8,4" Padding="4">
+        <materialDesign:Card x:Name="PreviewCard" Grid.Row="3" Grid.Column="2" Margin="4,4,8,4" Padding="4">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="36"></RowDefinition>
@@ -109,7 +110,7 @@
             </Grid>
         </materialDesign:Card>
 
-        <materialDesign:Card x:Name="FilterCard" Grid.Row="0" Grid.Column="1" Margin="4,8,8,4" Padding="4">
+        <materialDesign:Card x:Name="FilterCard" Grid.Row="0" Grid.Column="2" Margin="4,8,8,4" Padding="4">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="2*" MinHeight="45"></RowDefinition>
