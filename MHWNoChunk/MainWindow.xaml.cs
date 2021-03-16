@@ -65,7 +65,6 @@ namespace MHWNoChunk
             extractWorker.DoWork += new DoWorkEventHandler(DoExtractHandler);
             InitChinese();
             PrintLog("");
-            CheckCoreAutoDownload();
             CheckFilesExist();
             CheckDllVersion();
             PrintErrorInfo();
@@ -110,14 +109,14 @@ namespace MHWNoChunk
             if (!File.Exists("oo2core_8_win64.dll"))
             {
                 DialogResult result = System.Windows.Forms.MessageBox.Show(
-                    "oo2core_8_win64.dll not found. Download latest version from Warframe servers?",
-                    "oo2core_8_win64.dll not found",
+                    CNMode?"未找到oo2core_8_win64.dll，是否联网下载？":"oo2core_8_win64.dll not found. Download latest version from Warframe servers?",
+                    CNMode? "未找到oo2core_8_win64.dll" : "oo2core_8_win64.dll not found",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
 
                 if (result == System.Windows.Forms.DialogResult.Yes)
                 {
-                    PrintLog("Starting oo2core_8_win64.dll download from Warframe servers.");
+                    PrintLog(CNMode?"开始下载oo2core_8_win64.dll":"Starting oo2core_8_win64.dll download from Warframe servers.");
 
                     try
                     {
@@ -149,23 +148,20 @@ namespace MHWNoChunk
                         using (var fileStream = File.Create("oo2core_8_win64.dll"))
                         {
                             decoder.Code(compressedData, fileStream, compressedSize, decompressedSize, null);
-                            PrintLog("Completed oo2core_8_win64.dll download.");
+                            PrintLog(CNMode ? "oo2core_8_win64.dll下载完成" : "Completed oo2core_8_win64.dll download.");
                         }
                     }
                     catch (Exception e)
                     {
-                        ErrorsStack.Push($"Error: exception while downloading oo2core: {e.Message}");
-                        throw;
+                        PrintLog(CNMode ? "下载oo2core_8_win64.dll时发生错误，请重试" : "Error occured while downloading oo2core_8_win64.dll. Please try again.");
                     }
-
-
                 }
             }
         }
 
         public void CheckFilesExist()
         {
-            string[] filesRequired = { "oo2core_8_win64.dll", "SharpGL.dll" };
+            string[] filesRequired = { "SharpGL.dll" };
             foreach (string fileRequired in filesRequired)
             {
                 if (!File.Exists(fileRequired))
@@ -183,7 +179,7 @@ namespace MHWNoChunk
                 string curMd5 = CalculateMD5("oo2core_8_win64.dll");
                 if (!KnownCoreMd5.Any<string>(x => x.Equals(curMd5)))
                 {
-                    if (!CNMode) PrintLog("Warning: oo2core_8_win64.dll found but version not matched. Please try another .dll file from somewhere else if any unknown error occurs.");
+                    if (!CNMode) PrintLog("Warning: oo2core_8_win64.dll found but version does not match. Please try another .dll file from somewhere else if any unknown error occurs.");
                     else { PrintLog("警告：oo2core_8_win64.dll校验失败，如果报错，请从另一渠道获取该文件"); }
                 }
             }
@@ -224,6 +220,7 @@ namespace MHWNoChunk
         }
         private void DoAnalyzeHandler(object sender, DoWorkEventArgs e)
         {
+            CheckCoreAutoDownload();
             analyze(chunkFileName);
         }
 
@@ -313,7 +310,7 @@ namespace MHWNoChunk
                     if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}\\oo2core_8_win64.dll"))
                     {
                         if (!CNMode) PrintLog("Error: oo2core_8_win64.dll not found. Download the file from elsewhere to the executable folder.");
-                        else PrintLog("错误：未找到oo2core_8_win64.dll，请从其他地方下载该文件至本程序文件夹");
+                        else PrintLog("错误：未找到oo2core_8_win64.dll，请从其他地方下载该文件至本程序文件夹或使用本程序联网下载功能");
                         return;
                     }
                     Dispatcher.BeginInvoke(new Action(() =>
