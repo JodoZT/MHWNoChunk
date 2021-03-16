@@ -20,7 +20,7 @@ For help with bruteforcing the Iceborne chunk key order early on: Vuze, XunLi, A
 
 For texture preview function: Qowyn
 
-For other programming issues: rz7d, KeisukeOkaya
+For other programming issues: rz7d, KeisukeOkaya, Andoryuuta
 
 ## What this tool can do:
 * Decompress part of the MHW chunk file as you want. 
@@ -31,6 +31,10 @@ For other programming issues: rz7d, KeisukeOkaya
 [Nexusmods Page](https://www.nexusmods.com/monsterhunterworld/mods/411)
 
 ## Updates:
+* v3.0.1:
+    
+    Add oo2core auto download.
+    
 * v3.0.0:
 
     Update UI.
@@ -82,7 +86,7 @@ For other programming issues: rz7d, KeisukeOkaya
 
 ## Usage:
 0. The tool is developed based on __.net framework 4.7.2__. If you can't open the software properly, double click the .net framework 4.7.2.exe to install it(web install).
-1. \*Copy __oo2core_8_win64.dll__ from the somewhere else(like Warframe) to the directory of "MHWNoChunk.exe".
+1. \*Copy __oo2core_8_win64.dll__ from the somewhere else(like Warframe) to the directory of "MHWNoChunk.exe" or use the auto download function of this tool later.
 2. Double click the "MHWNoChunk.exe" file to start.
 3. Drag and drop the chunkN.bin file you want to decompress to the blank area of the software GUI. Check the 'Combine all chunks' option on the right side before dragdrop if you want to once combine all chunkNs and extract with all the newest-versioned-files. 
 4. Check the checkbox of the files you want.
