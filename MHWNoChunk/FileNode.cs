@@ -29,7 +29,7 @@ namespace MHWNoChunk
             set
             {
                 isSelected = value;
-                setChilrenSelected(value);
+                setChildrenSelected(value);
                 if (this.PropertyChanged != null)
                 {
                     this.PropertyChanged.Invoke(this, new PropertyChangedEventArgs("IsSelected"));
@@ -66,7 +66,7 @@ namespace MHWNoChunk
             return count;
         }
 
-        public void setChilrenSelected(bool? selected)
+        public void setChildrenSelected(bool? selected)
         {
             foreach (FileNode child in Childern)
             {
